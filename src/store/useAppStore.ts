@@ -216,7 +216,6 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
     if (!s.trim()) return;
     
     const store = get();
-    // 🚀 1. 點擊瞬間給予回饋
     store.showToast("🔍 AI 正在分析句子難度...", "info");
 
     try {
@@ -240,7 +239,6 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
       }
       set({ drafts: next });
 
-      // 🚀 2. 檢查完畢後給予明確的結果提示
       if (res.isValid) {
         store.showToast("✅ 難度適中！完美符合該年級程度。", "success");
       } else {
@@ -248,7 +246,6 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
       }
 
     } catch (e) {
-      // 🚀 3. 攔截錯誤並通知使用者
       store.showToast("❌ 難度分析失敗，請稍後再試", "error");
     }
   },
@@ -313,7 +310,6 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
     } catch (e: any) { handleError(set, e, '優化失敗'); } finally { set({ loading: false }); }
   },
 
-  // 🚀 序列化校準 (解決隱患一：API 併發風暴)
   handleValidateSentences: async () => {
     const s = get(); if (s.drafts.length === 0) return; set({ loading: true, error: null });
     try {
@@ -347,8 +343,6 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
           }
           next[i] = { ...next[i], paths: newPaths };
         }
-
-        // 延遲 500 毫秒避免撞到 Rate Limit
         if (i < next.length - 1) await new Promise(resolve => setTimeout(resolve, 500));
       }
       set({ drafts: next }); get().showToast("校準完成！");
@@ -441,20 +435,16 @@ const createScriptSlice: StateCreator<SharedState, [], [], ScriptSlice> = (set, 
     globalAbortController = new AbortController();
 
     const currentGrade = gradeConfig[s.grade as keyof typeof gradeConfig];
-    
-    // 🚀 1. 致命錯誤修正：直接使用 Object.values(skins).flat()，絕對不要加 COMMON_REAL_SKINS
     const allSkins = Object.values(skins).flat();
     const skin = allSkins.find(sk => sk.id === s.skinId) || allSkins[0];
     
     const style = styleLib.find(st => st.id === s.styleId) || styleLib[0];
     const tool = THINKING_TOOLS_DETAILED.find(t => t.name === s.thinkingTool);
-    const layout = layoutSkills?.find(l => l.id === 'skel-v8') || layoutSkills[0];
+    const layout = layoutSkills?.find(l => l.id === 'skel-v10') || layoutSkills[0]; // 確保抓到 v10
     
     const skinTone = s.customTones[s.skinId] ?? skin.tone;
 
-    // 🚀 2. 動態人設發動：根據不同皮膚，賦予 Host 2 不同的靈魂
     let host2Role = "The 'Curious Apprentice' coach. Asks innocent questions, tries to write but sometimes writes too plainly or literally, allowing Host 1 to refine it into a masterpiece.";
-    
     if (skin.type === 'fun') {
       host2Role = "The 'Messy/Chaotic' coach. Energetic but often gives literal, exaggerated, or funny bad examples showing what happens when the technique goes wrong.";
     } else if (s.skinId === 'lawyer') {
@@ -479,7 +469,6 @@ const createScriptSlice: StateCreator<SharedState, [], [], ScriptSlice> = (set, 
 
     let batonSentence = "接下來，讓我們一起進入這段精彩的旅程吧！"; 
 
-    // 🚀 3. 組裝動態 Audio Prompt (從寫死 Ah Jie 改為動態人設)
     const audioPrompt = `## 🎙️ NotebookLM Audio 語音生成專用指令 (請複製貼上至 Customize 框)
 \`\`\`text
 Strictly generate a role-play dialogue in Traditional Chinese (Taiwanese Mandarin).
@@ -506,10 +495,7 @@ You are acting as two writing coaches. You are teaching students how to write ab
 **Tone:** ${skinTone}. Focus on VISUAL details and techniques. Do not stray off-topic.
 \`\`\``;
 
-
-
     try {
-      // 🚀 將 Audio 指令印在 Markdown 最頂端
       set({ mdOutput: `# ${s.topic} 沉浸式寫作特訓（${skin.name} Edition）\n\n${audioPrompt}\n\n---\n\n## Part 1：任務簡報\n\n` });
 
       // Chunk 1: 開場
@@ -520,8 +506,9 @@ You are acting as two writing coaches. You are teaching students how to write ab
         set((state) => ({ mdOutput: state.mdOutput + chunk }));
       }, style.name, globalAbortController.signal);
       
-      const introDialogues = introChunkText.match(/Host 2(?:\*\*)?：「([^」]+)」/g);
-      if (introDialogues) batonSentence = introDialogues[introDialogues.length - 1].replace(/Host 2(?:\*\*)?：「|」/g, "").slice(-30);
+      // 🛡️ 終極防禦：強健的正則表達式捕捉 Host 2 接力棒
+      const introDialogues = introChunkText.match(/(?:Host 2|主持人 2|Host2)[*\s]*[：:]*[*\s]*[「"']([^」"']+)['"」]/g);
+      if (introDialogues) batonSentence = introDialogues[introDialogues.length - 1].replace(/^(?:Host 2|主持人 2|Host2)[*\s]*[：:]*[*\s]*[「"']|['"」]$/g, "").slice(-30);
 
       set((state) => ({ mdOutput: state.mdOutput + '\n\n---\n\n## Part 2：核心教學循環\n\n' }));
 
@@ -536,8 +523,9 @@ You are acting as two writing coaches. You are teaching students how to write ab
           set((state) => ({ mdOutput: state.mdOutput + chunk }));
         }, style.name, globalAbortController.signal);
         
-        const dialogues = paraChunkText.match(/Host 2(?:\*\*)?：「([^」]+)」/g);
-        if (dialogues) batonSentence = dialogues[dialogues.length - 1].replace(/Host 2(?:\*\*)?：「|」/g, "").slice(-30);
+        // 🛡️ 終極防禦：強健的正則表達式捕捉 Host 2 接力棒
+        const dialogues = paraChunkText.match(/(?:Host 2|主持人 2|Host2)[*\s]*[：:]*[*\s]*[「"']([^」"']+)['"」]/g);
+        if (dialogues) batonSentence = dialogues[dialogues.length - 1].replace(/^(?:Host 2|主持人 2|Host2)[*\s]*[：:]*[*\s]*[「"']|['"」]$/g, "").slice(-30);
 
         set((state) => ({ mdOutput: state.mdOutput + '\n\n' }));
       }
@@ -570,18 +558,14 @@ You are acting as two writing coaches. You are teaching students how to write ab
     }
   },
 
-  // 🚀 已修復：捕獲重組引擎 (徹底解決碎塊與重複規格表問題)
   handleTransformToYAML: async () => {
     const s = get(); if (!s.mdOutput) return;
     set({ isConverting: true, yamlOutput: '', activeTab: 'yaml' });
     const style = styleLib.find(st => st.id === s.styleId) || styleLib[0];
 
-    // 🚀 捕獲重組引擎：精準切分 Markdown 區塊，確保與編輯器邏輯一致
-    // 使用 Lookahead 確保分隔符保留在區塊開頭，且只在換行處切分
-    const validChunks = s.mdOutput.split(/\n(?=【版型】|版型|\[Layout\]|Layout)/i).filter(c => c.trim().length > 0);
-    
-    // 🚀 核心邏輯：判斷第一個區塊是否為「前言/規格表」
-    const hasPreamble = validChunks.length > 0 && !/^(?:【版型】|版型|\[Layout\]|Layout)/i.test(validChunks[0].trim());
+    // 🛡️ 終極防禦 1：容錯率更高的 Markdown 切分正則
+    const validChunks = s.mdOutput.split(/\n(?=\s*(?:#|\*)*\s*(?:【版型】|\[Layout\]))/i).filter(c => c.trim().length > 0);
+    const hasPreamble = validChunks.length > 0 && !/^\s*(?:#|\*)*\s*(?:【版型】|\[Layout\])/i.test(validChunks[0]);
     
     const preamble = hasPreamble ? validChunks[0] : "";
     const slides = hasPreamble ? validChunks.slice(1) : validChunks;
@@ -589,12 +573,20 @@ You are acting as two writing coaches. You are teaching students how to write ab
     try {
       for (let i = 0; i < slides.length; i++) {
         const slideIndex = i + 1;
-        // 第一頁使用 buildYamlTransform (包含 driver/metadata)，後續使用 buildYamlChunkTransform
-        const prompt = (i === 0) 
-          ? PromptFactory.buildYamlTransform(preamble + slides[i], slideIndex)
-          : PromptFactory.buildYamlChunkTransform(slides[i], slideIndex);
         
-        await generateFullScriptStream(prompt, undefined, (chunk) => set((state) => ({ yamlOutput: state.yamlOutput + chunk })), style.name);
+        // 🛡️ 終極防禦 2：物理隔離法，強制將 Slide A01, Slide M1 等字眼替換為正確的 Slide P1, P2
+        const sanitizedChunk = slides[i].replace(/Slide\s+[A-Za-z0-9]+/gi, `Slide P${slideIndex}`);
+
+        const prompt = (i === 0) 
+          ? PromptFactory.buildYamlTransform(preamble + sanitizedChunk, slideIndex)
+          : PromptFactory.buildYamlChunkTransform(sanitizedChunk, slideIndex);
+        
+        await generateFullScriptStream(prompt, undefined, (chunk) => {
+          // 🛡️ 終極防禦 3：邊接收邊脫殼，強制濾掉 AI 偷加的 ```yaml 外殼
+          const cleanChunk = chunk.replace(/```yaml\n?/gi, '').replace(/```\n?/g, '');
+          set((state) => ({ yamlOutput: state.yamlOutput + cleanChunk }));
+        }, style.name);
+        
         set((state) => ({ yamlOutput: state.yamlOutput + '\n' }));
       }
     } catch (e) { set({ error: "YAML 轉譯失敗" }); } 
