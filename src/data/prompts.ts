@@ -221,15 +221,14 @@ ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴�
   buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
     const base = PromptFactory.buildBasePrompt(skin.name, skin.tone, skin.metaphor.vocab, skin.metaphor.sentence, "預設風格", "無");
     
-// 🚀 新增：捨棄死板字數，改用語感、意群與原詩鏡像來強制排版
+// 🚀 核心修正：加入【1:1 行數嚴格對等】與【結構鏡像】
     const isPoem = genre.includes('詩');
     const fullExampleRule = isPoem 
-      ? `2. **fullExample (完整範文)**：【🚨 詩歌排版絕對指令】必須是一小節純粹的童詩！
-   - ⚠️ 節奏與斷行：請捨棄死板的字數限制！改以「意群（一個完整的畫面或動作）」或「呼吸停頓點」來分行。
-   - ⚠️ 原詩鏡像：請觀察原詩該小節的長短句交錯方式。原詩若有長句結尾，範文也應有優美的長句收尾。
-   - ⚠️ 強制斷行：【絕對必須】在每一個斷句的結尾加上換行符號（\\n），保持詩的視覺階梯感！
-   - ⭕ 正確範例：「在微風輕輕吹拂的早晨，\\n小溪流開心地向前奔跑，\\n它就像一條閃亮的彩帶，\\n溫柔地灌溉著每一寸乾渴的青草。」
-   - ❌ 災難範例（連續散文）：在微風輕輕吹拂的早晨，小溪流開心地向前奔跑，它就像一條閃亮的彩帶，溫柔地灌溉著每一寸乾渴的青草。
+      ? `2. **fullExample (完整範文)**：【🚨 詩歌結構對等指令】必須是一小節純粹的童詩！
+   - ⚠️ 【1:1 行數嚴格對等】：請計算原詩該段落的行數，仿作範文的行數必須與其「完全相同」。
+   - ⚠️ 結構鏡像：每一行對應的「長度」與「節奏」應盡可能與原詩保持一致。
+   - ⚠️ 強制斷行：每一行結尾必須加上換行符號（\\n）。
+   - ⭕ 正確示範 (原詩4行)：範文也必須嚴格保持4行。
    - 🚨 必須是一首自然、完整的詩，【絕對禁止】寫成散文，且【絕對禁止】出現任何【】括號！`
       : `2. **fullExample (完整範文)**：必須是一段「完整的文章段落」。長度必須大於示範例句。🚨 必須是流暢的文章，【絕對禁止】出現任何【】括號或填空提示！`;
     return `${base}
