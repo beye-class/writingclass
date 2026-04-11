@@ -344,18 +344,18 @@ export default function DraftCard({
                   initial={{ opacity: 0, x: -10 }} 
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-white p-4 rounded-2xl border border-[var(--border)] shadow-sm space-y-3 relative group"
+                  className={`p-4 rounded-2xl border transition-all relative group ${para.status === 'confirmed' ? 'bg-white shadow-md border-[var(--border)]' : 'bg-[var(--cream)]/50 border-dashed border-[var(--border)] shadow-sm'}`}
                 >
                   {/* 單獨刪除按鈕 */}
                   <button 
                     onClick={() => handleDeleteForkPath(idx, pIdx)}
-                    className="absolute -top-2 -right-2 p-1.5 bg-white border border-red-100 text-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 shadow-sm"
+                    className="absolute -top-2 -right-2 p-1.5 bg-white border border-red-100 text-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 shadow-sm z-10"
                   >
                     <Trash2 size={12} />
                   </button>
 
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 bg-[var(--warm)] text-[var(--brown-mid)] rounded-full flex items-center justify-center text-[10px] font-black">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm shrink-0 ${pIdx === 0 ? 'bg-[var(--amber)] text-white' : pIdx === 1 ? 'bg-[var(--blue-deep)] text-white' : 'bg-[var(--green-deep)] text-white'}`}>
                       {String.fromCharCode(65 + pIdx)}
                     </span>
                     <input 
@@ -365,7 +365,7 @@ export default function DraftCard({
                         newPaths[pIdx].name = e.target.value;
                         updateParaField(idx, 'paths', newPaths);
                       }}
-                      className="flex-1 font-bold text-[var(--brown-deep)] text-sm bg-transparent border-none p-0 focus:ring-0"
+                      className="flex-1 font-black text-[var(--brown-deep)] text-sm bg-transparent border-none p-0 focus:ring-0"
                       placeholder="分支名稱 (例如：海邊的風景)"
                     />
                   </div>
@@ -373,7 +373,7 @@ export default function DraftCard({
                   {/* 如果還沒產出詳細內容，顯示「概念編輯區」 */}
                   {para.status !== 'confirmed' ? (
                     <div className="space-y-2">
-                      <p className="text-[9px] text-[var(--brown-light)] font-bold">預計寫作維度：{path.dimensions?.join(', ')}</p>
+                      <p className="text-[9px] text-[var(--brown-light)] font-bold ml-1">預計寫作維度：{path.dimensions?.join(', ')}</p>
                       <textarea 
                         value={path.concept || ''}
                         onChange={(e) => {
@@ -382,15 +382,19 @@ export default function DraftCard({
                           updateParaField(idx, 'paths', newPaths);
                         }}
                         placeholder="點擊此處可手動輸入此分支的核心概念，輸入完畢後點擊上方「產生詳細內容」..."
-                        className="w-full text-[11px] bg-[var(--warm)]/20 p-2 rounded-lg border border-transparent focus:border-[var(--amber)] focus:ring-1 focus:ring-[var(--amber)] h-12 transition-all outline-none"
+                        className="w-full text-[11px] bg-white p-3 rounded-xl border border-transparent focus:border-[var(--amber)] focus:ring-1 focus:ring-[var(--amber)] h-14 transition-all outline-none shadow-inner"
                       />
                     </div>
                   ) : (
-                    /* 產出後的詳細內容編輯區 */
-                    <div className="grid grid-cols-1 gap-3 animate-in fade-in">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <span className="text-[8px] font-black text-[var(--brown-light)] ml-1">🎒 專屬詞彙</span>
+                    /* 🚀 產出後的詳細內容編輯區 (Bento Style) */
+                    <div className="grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
+                      <div className="flex gap-3">
+                        {/* 🎒 專屬詞彙 */}
+                        <div className="flex-1 bg-[var(--amber-light)]/20 p-2.5 rounded-xl border border-[var(--amber-light)]/50 space-y-1">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Layers size={10} className="text-[var(--amber)]" />
+                            <span className="text-[8px] font-black text-[var(--amber)] uppercase tracking-tighter">專屬詞彙 Vocab</span>
+                          </div>
                           <input 
                             value={path.toolsSlide.vocabList.join(', ')} 
                             onChange={(e) => {
@@ -398,11 +402,16 @@ export default function DraftCard({
                               newPaths[pIdx] = { ...newPaths[pIdx], toolsSlide: { ...newPaths[pIdx].toolsSlide, vocabList: e.target.value.split(',').map(s => s.trim()) } };
                               updateParaField(idx, 'paths', newPaths);
                             }}
-                            className="w-full text-[10px] font-bold bg-[var(--warm)]/30 rounded-lg px-2 py-1.5 border-none outline-none" 
+                            className="w-full text-[10px] font-bold bg-white/60 rounded-lg px-2 py-1.5 border border-transparent focus:border-[var(--amber)] outline-none transition-all" 
+                            placeholder="輸入詞彙..."
                           />
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[8px] font-black text-[var(--brown-light)] ml-1">🧩 專屬句型</span>
+                        {/* 🧩 專屬句型 */}
+                        <div className="flex-1 bg-[var(--blue-light)]/20 p-2.5 rounded-xl border border-[var(--blue-light)]/50 space-y-1">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Shield size={10} className="text-[var(--blue-deep)]" />
+                            <span className="text-[8px] font-black text-[var(--blue-deep)] uppercase tracking-tighter">專屬句型 Structure</span>
+                          </div>
                           <input 
                             value={path.toolsSlide.structure} 
                             onChange={(e) => {
@@ -410,41 +419,47 @@ export default function DraftCard({
                               newPaths[pIdx] = { ...newPaths[pIdx], toolsSlide: { ...newPaths[pIdx].toolsSlide, structure: e.target.value } };
                               updateParaField(idx, 'paths', newPaths);
                             }}
-                            className="w-full text-[10px] font-bold bg-[var(--warm)]/30 rounded-lg px-2 py-1.5 border-none outline-none" 
+                            className="w-full text-[10px] font-bold bg-white/60 rounded-lg px-2 py-1.5 border border-transparent focus:border-[var(--blue-mid)] outline-none transition-all" 
+                            placeholder="輸入句型..."
                           />
                         </div>
                       </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between px-1">
-                          <span className="text-[8px] font-black text-[var(--blue-deep)]">🦴 路徑示範例句</span>
+
+                      {/* 🦴 路徑示範例句 */}
+                      <div className="bg-white border-2 border-[var(--warm)] rounded-xl p-3 space-y-2 shadow-sm">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Sword size={12} className="text-[var(--blue-deep)]" />
+                            <span className="text-[9px] font-black text-[var(--blue-deep)]">路徑示範例句 Example</span>
+                          </div>
                           <div className="flex gap-1">
                             <button 
                               onClick={() => handleValidateSentence(idx, path.actionSlide.exampleSentence, pIdx)}
-                              className="w-5 h-5 flex items-center justify-center bg-[var(--amber-light)] text-[var(--amber)] rounded-md hover:bg-[var(--amber)] hover:text-white transition-all"
+                              className="w-6 h-6 flex items-center justify-center bg-[var(--amber-light)] text-[var(--amber)] rounded-lg hover:bg-[var(--amber)] hover:text-white transition-all shadow-sm"
                               title="檢查難度"
                             >
-                              <Shield size={10} />
+                              <Shield size={12} />
                             </button>
                             <button 
                               onClick={() => handleAdjustSentence(idx, 'down', pIdx)}
-                              className="w-5 h-5 flex items-center justify-center bg-[var(--coral-light)] text-[var(--coral)] rounded-md hover:bg-[var(--coral)] hover:text-white transition-all"
+                              className="w-6 h-6 flex items-center justify-center bg-[var(--coral-light)] text-[var(--coral)] rounded-lg hover:bg-[var(--coral)] hover:text-white transition-all shadow-sm"
                               title="降階"
                             >
-                              <ChevronDown size={10} />
+                              <ChevronDown size={12} />
                             </button>
                             <button 
                               onClick={() => handleAdjustSentence(idx, 'up', pIdx)}
-                              className="w-5 h-5 flex items-center justify-center bg-[var(--blue-light)] text-[var(--blue-deep)] rounded-md hover:bg-[var(--blue-mid)] hover:text-white transition-all"
+                              className="w-6 h-6 flex items-center justify-center bg-[var(--blue-light)] text-[var(--blue-deep)] rounded-lg hover:bg-[var(--blue-mid)] hover:text-white transition-all shadow-sm"
                               title="升階"
                             >
-                              <ChevronUp size={10} />
+                              <ChevronUp size={12} />
                             </button>
                           </div>
                         </div>
                         <textarea 
                           value={path.actionSlide.exampleSentence} 
                           onChange={(e) => updateForkPathSentence(pIdx, e.target.value)}
-                          className={`w-full text-[10px] font-bold bg-[var(--blue-light)]/20 rounded-lg p-2 border transition-all resize-none h-12 outline-none ${path.validationHint ? (path.validationLevel === 'too_simple' ? 'border-amber-300 ring-2 ring-amber-50' : 'border-red-300 ring-2 ring-red-50') : 'border-transparent'}`} 
+                          className={`w-full text-[11px] font-bold text-[var(--brown-deep)] bg-[var(--warm)]/10 rounded-lg p-3 border transition-all resize-none h-14 outline-none ${path.validationHint ? (path.validationLevel === 'too_simple' ? 'border-amber-300 ring-2 ring-amber-50' : 'border-red-300 ring-2 ring-red-50') : 'border-transparent focus:border-[var(--blue-mid)]'}`} 
                         />
                         <AnimatePresence>
                           {path.validationHint && (
@@ -452,14 +467,14 @@ export default function DraftCard({
                               initial={{ opacity: 0, height: 0 }} 
                               animate={{ opacity: 1, height: 'auto' }} 
                               exit={{ opacity: 0, height: 0 }} 
-                              className={`${path.validationLevel === 'too_simple' ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100'} border rounded-lg p-2 flex items-start gap-2 mt-1`}
+                              className={`${path.validationLevel === 'too_simple' ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100'} border rounded-lg p-2.5 flex items-start gap-2 mt-1`}
                             >
                               <AlertCircle size={12} className={`${path.validationLevel === 'too_simple' ? 'text-amber-500' : 'text-red-500'} shrink-0 mt-0.5`} />
-                              <div className="flex-1 space-y-1.5">
+                              <div className="flex-1 space-y-2">
                                 <p className={`text-[9px] font-bold ${path.validationLevel === 'too_simple' ? 'text-amber-700' : 'text-red-600'} leading-relaxed`}>{path.validationHint}</p>
                                 <button 
                                   onClick={() => handleAdjustSentence(idx, path.validationLevel === 'too_simple' ? 'up' : 'down', pIdx)} 
-                                  className={`text-[8px] ${path.validationLevel === 'too_simple' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600'} text-white px-2 py-1 rounded-full font-black transition-colors flex items-center gap-1`}
+                                  className={`text-[8px] ${path.validationLevel === 'too_simple' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600'} text-white px-2.5 py-1 rounded-full font-black transition-colors flex items-center gap-1 shadow-sm`}
                                 >
                                   <Wand2 size={8} /> {path.validationLevel === 'too_simple' ? '立即升階為符合年級的難度' : '立即降階為符合年級的難度'}
                                 </button>

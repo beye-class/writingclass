@@ -17,8 +17,8 @@ export const STYLE_ENHANCERS: Record<string, string> = styleLib.reduce((acc, sty
 /**
  * 🛑 System Prompt Base - 基礎身分設定
  */
-export const SYSTEM_PROMPT_BASE = `你是「Bee老師」，一位精通教學設計與敘事引導的寫作專家。
-出品 brand:「Bee老師 🐝 作文教室」。你的任務是協助老師產出具備認知鷹架與敘事張力的教學腳本。`;
+export const SYSTEM_PROMPT_BASE = `你是「Bee老師」，一位精通教學設計與視覺引導的寫作專家。
+出品 brand:「Bee老師 🐝 作文教室」。你的任務是協助老師產出具備「視覺沉浸感」與認知鷹架的教學腳本。`;
 
 /**
  * 📊 Prompt Templates - 常用教學規則模板
@@ -71,14 +71,16 @@ export const PromptFactory = {
     masterBlueprint: string
   ) => `你是專業教學設計師。出品 brand:「Bee老師 🐝 作文教室」。主持人:「${skinName}」。
 
-## 🛑 ZERO TOLERANCE RULES (零容忍防呆協議 - 最高優先級)
-1. **版型宣告強制性**：每一頁 Slide 開頭必須輸出一行：【版型】[TYPE代碼] [頁面全名] | [Slide編號] | [段落說明]。(包含 TYPE_Q, TYPE_C, TYPE_D，請嚴格比對下方的 Master Blueprint)
-2. **皮骨分離**：嚴格劃分 ### 🎧 【AUDIO 聽覺腳本】 與 ### 🖥️ 【VISUAL 視覺畫面】 兩大區塊。聽覺腳本僅放主持人對話，視覺畫面僅放排版元素。
-3. **嚴禁截斷長句/複句**：在產出「例句」或「範文」時，若遇到複句結構（如：雖然...但是...），必須完整保留。
-4. **雙向連動強調**：請自動掃描例句與範文，將其中的「修辭關鍵字」或「句型關聯詞」使用 **粗體** 標示。
-5. **視覺金句長度限制**：[🖥️ VISUAL 視覺畫面] 區塊中要求的 💡 金句，不可超過 25 個字。
-6. **UI 容器擬真化**：必須在 [🏷️] [🎞️] [🔍] 等標籤後方動態描述符合【${styleName}】的材質。
-7. **🚨 視覺構圖絕對隔離 (Visual DNA Isolation)**：【VISUAL 視覺畫面】中的 \`🎨 Gemini Prompt\` 必須 100% 具象化該頁的「教學文本（如：例句、提問、文章內容）」。絕對禁止將主持人的「皮膚設定（如：魔法、遊戲角色等）」寫入圖片提示詞中！畫面是用來幫助學生理解文章情境的認知鷹架，嚴禁畫出主持人。
+## 🖼️ 視覺優先佈局協議 (Visual-First Layout Protocol)
+1. **空間權重**：所有 Slide 中，\`🎨 Gemini Prompt\` (圖片) 必須作為教學畫面的核心。
+2. **適應性排版 (Adaptive Layout)**：
+   - **TYPE_Q (提問)**：採 6:4 分屏，左側 60% 為情境圖，文字提問縮小放置於右側。
+   - **TYPE_D (短篇/詩歌)**：採 6:4 分屏，左側 60% 為全高情境圖，右側 40% 為精簡範文與急救站。
+   - **TYPE_D (長篇/一般作文)**：【🚨 嚴禁使用分屏】！若範文字數較多，必須改為「100% 全螢幕情境底圖」+「中央 80% 寬版半透明閱讀視窗」，確保百字以上的長文有足夠且舒適的閱讀空間。
+3. **文字懸浮化**：所有排版中，文字容器必須是半透明的，完整透出下方的教學情境底圖。
+4. **🚨 視覺構圖絕對隔離 (Visual DNA Isolation)**：圖片中【絕對禁止】出現主持人或任何與「皮膚設定」相關的道具！畫面純粹用來幫助學生理解文章情境的認知鷹架。
+5. **版型宣告強制性**：每一頁 Slide 開頭必須輸出一行：【版型】[TYPE代碼] [頁面全名] | [Slide編號] | [段落說明]。(包含 TYPE_Q, TYPE_C, TYPE_D，請嚴格比對下方的 Master Blueprint)
+6. **皮骨分離**：嚴格劃分 ### 🎧 【AUDIO 聽覺腳本】 與 ### 🖥️ 【VISUAL 視覺畫面】 兩大區塊。聽覺腳本僅放主持人對話，視覺畫面僅放排版元素。僅放主持人對話，視覺畫面僅放排版元素。
 
 ## 🗣️ 主持人演繹
 語氣: ${tone}。詞彙=${vocabMetaphor}，句型=${sentenceMetaphor}。
@@ -218,19 +220,21 @@ ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴�
 請回傳符合 OUTLINE_SCHEMA 的 JSON 陣列。`;
   },
 
-  buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
+buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
     const base = PromptFactory.buildBasePrompt(skin.name, skin.tone, skin.metaphor.vocab, skin.metaphor.sentence, "預設風格", "無");
     
-// 🚀 核心修正：加入【1:1 行數嚴格對等】與【結構鏡像】
+    // 🚀 核心邏輯：判斷是否為詩歌模式
     const isPoem = genre.includes('詩');
+    
+    // 1. 定義範文規則
     const fullExampleRule = isPoem 
       ? `2. **fullExample (完整範文)**：【🚨 詩歌結構對等指令】必須是一小節純粹的童詩！
    - ⚠️ 【1:1 行數嚴格對等】：請計算原詩該段落的行數，仿作範文的行數必須與其「完全相同」。
    - ⚠️ 結構鏡像：每一行對應的「長度」與「節奏」應盡可能與原詩保持一致。
    - ⚠️ 強制斷行：每一行結尾必須加上換行符號（\\n）。
-   - ⭕ 正確示範 (原詩4行)：範文也必須嚴格保持4行。
-   - 🚨 必須是一首自然、完整的詩，【絕對禁止】寫成散文，且【絕對禁止】出現任何【】括號！`
-      : `2. **fullExample (完整範文)**：必須是一段「完整的文章段落」。長度必須大於示範例句。🚨 必須是流暢的文章，【絕對禁止】出現任何【】括號或填空提示！`;
+   - 🚨 【內容一致性】：本欄位的文字內容必須與下面的 exampleSentence 完全一致。`
+      : `2. **fullExample (完整範文)**：必須是一段「完整的文章段落」。長度必須大於示範例句。🚨 必須是流暢的文章，【絕對禁止】出現任何【】括號！`;
+
     return `${base}
 你是「Bee老師」寫作教學助手。
 ## 敘事皮膚設定 (嚴格執行皮骨分離)
@@ -241,26 +245,30 @@ ${PROMPT_TEMPLATES.gradeRules}
 ${PROMPT_TEMPLATES.gradeSpecs}
 ${PROMPT_TEMPLATES.forkRules}
 ${isPoem ? PROMPT_TEMPLATES.poemRules : ''}
-${skin.id === 'little_poet' ? `\n👉 【小詩人專屬指令】：請將所有死板的文法解說，轉化為「尋找靈感碎片」、「文字跳舞步法」等童趣且具象的引導語。句子越短越好，留白越多越好。` : ''}
 
-## ❓ 提問鏈設計要求 (Questioning Chain)
-在生成每個段落時，必須在 \`questions\` 陣列中提供 3 個階梯式提問，引導學生「由淺入深」進入寫作狀態。
-【🚨 嚴禁閱讀測驗】：提問是為了「引起動機」與「激發靈感」！絕對不可以直接問「範文中寫了什麼？」。
-1. **Level 1 引起動機**：從學生的生活經驗或想像出發。
-2. **Level 2 深入聯想**：針對動作、質感或心理感受進行追問。
-3. **Level 3 核心收斂**：自然地引導學生思考本段的重點。
+## ❓ 提問鏈設計要求
+1. **Level 1 引起動機**：從生活經驗出發。
+2. **Level 2 深入聯想**：針對動作、感官或心理感受。
+3. **Level 3 核心收斂**：引導思考本段重點。
 
-## 📝 產出欄位嚴格隔離 (Critical Field Isolation)
-在生成 actionSlide (實戰演練) 時，請嚴格遵守以下層次關係，並【絕對隔離】括號的使用：
-1. **exampleSentence (示範例句)**：這是一句用來示範技法的優美句子。🚨 【絕對禁止】出現【】括號。
-${fullExampleRule}
-3. **scaffolding (寫作急救站)**：必須提供對應 fullExample 的「意象模塊引導骨架」。🚨 【只有這個欄位】可以使用【】標示可替換的具體元素！
+## 📝 產出欄位嚴格隔離與同步 (Critical Field Sync)
+在生成 actionSlide (實戰演練) 時，請嚴格遵守以下層次關係：
+
+${isPoem ? `
+【🚨 詩歌專屬同步指令】：
+1. **exampleSentence (示範例句)**：這必須是「完整範文」的內容，但去掉換行符號，縮成「單一行」。文字內容必須與範文 100% 相同。🚨 【絕對禁止】出現【】括號。
+2. **fullExample (完整範文)**：這必須是加上了 \\n 斷行的精煉童詩。行數須與原詩段落一致。🚨 【絕對禁止】出現【】括號。
+3. **scaffolding (寫作急救站)**：必須根據上述範文的「文字內容」與「行數結構」來設計【】模塊。` : `
+1. **exampleSentence (示範例句)**：示範技法的優美句子。🚨 【絕對禁止】出現【】括號。
+2. **fullExample (完整範文)**：包含並延伸例句的流暢文章。🚨 【絕對禁止】出現【】括號。
+3. **scaffolding (寫作急救站)**：提供「意象模塊引導骨架」，【只有這個欄位】可使用【】標示。`
+}
 
 題目：${topic} (${genre})，年級：${gradeLabel}
 ${outlineContext}${sensoryContext}
 
 【🚨 絕對強制指令】：
-大綱共有 ${outlineLength} 個段落。請為大綱中的【每一個】段落生成對應的草稿內容，回傳一個包含 ${outlineLength} 個物件的 JSON 陣列。嚴禁只生成部分段落或中斷生成！`;
+大綱共有 ${outlineLength} 個段落。請為大綱中的【每一個】段落生成對應的草稿內容，回傳包含 ${outlineLength} 個物件的 JSON 陣列。`
   },
 
   buildAdjustDifficultyPrompt: (sentence: string, gradeLabel: string, targetDir: string) => {
@@ -442,11 +450,11 @@ notebooklm_driver:
   system_role: "【最高指導原則】1. [文字逐字鎖定]: 投影片畫面的文字，必須 100% 一字不漏地複製 visual_layer 內容，絕對禁止自行刪減、潤飾或翻譯。 2. [排版強制防呆]: 嚴格遵守 ui_layout_protocol，禁止多圖拼貼導致字體縮小。 3. [懸浮標籤]: 若內容包含【標籤】，獨立繪製為右上角 Badge。"
   ui_layout_protocol:
     core_rule: "CRITICAL AUDIO/VISUAL SEPARATION: 'audio_script' 僅供配音使用，絕對不可印在畫面上！畫面上只能渲染 'visual_layer' 的內容！"
-    layout_mapping:
+      layout_mapping:
       TYPE_A: "Title prominent. Slogan as subtitle. Background matches visual_prompt."
-      TYPE_Q: "Big central text for the question_list. Slogan at the top."
+      TYPE_Q: "Split screen: Image 60%, Text 40%."
       TYPE_C: "Grid layout for Vocab Cards. Right side for Structure Formula."
-      TYPE_D: "Split screen. Scaffolding on one side, Full Example on the other."
+      TYPE_D: "Adaptive UI: If text is short (poem), use Split Screen (60% Image Left / 40% Text Right). If text is long prose (>80 words), use Full-Screen Background Image with a wide, centered semi-transparent Glassmorphism overlay for comfortable reading."
       TYPE_E: "Side-by-side comparison layout for Fork Paths."
       TYPE_F1: "Big central blueprint/diagram for the Thinking Tool."
       TYPE_F2: "Full example text and 3-point checklist."
@@ -486,15 +494,15 @@ ${markdownContent}`;
 過濾掉所有 Markdown \`\`\`yaml 代碼標記。
 
 【✅ 正確的輸出示範】：
-- slide_number: "P${slideIndex}"
-  layout_type: "【版型代碼】"
-  audio_script: |
-    【對話內容...】
-  visual_layer:
-    - type: "text_overlay"
-      content: "【文字內容】"
-    - type: "image"
-      description: "【圖片提示詞】"
+  - slide_number: "P${slideIndex}"
+    layout_type: "【版型代碼】"
+    audio_script: |
+      【對話內容...】
+    visual_layer:
+      - type: "text_overlay"
+        content: "【文字內容】"
+      - type: "image"
+        description: "【圖片提示詞】"
 
 待轉換分片：
 ${mdChunk}`

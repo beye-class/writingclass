@@ -577,31 +577,24 @@ You are acting as two writing coaches. You are teaching students how to write ab
     const style = styleLib.find(st => st.id === s.styleId) || styleLib[0];
 
     // 🚀 捕獲重組引擎：精準切分 Markdown 區塊，確保與編輯器邏輯一致
-    const parts = s.mdOutput.split(/(【版型】|版型|\[Layout\]|Layout)/i);
-    const allChunks: string[] = [parts[0]];
-    for (let i = 1; i < parts.length; i += 2) {
-      allChunks.push(parts[i] + (parts[i + 1] || ''));
-    }
-    
-    // 過濾掉可能存在的純空白幽靈區塊
-    const validChunks = allChunks.filter(c => c.trim().length > 0);
+    // 使用 Lookahead 確保分隔符保留在區塊開頭，且只在換行處切分
+    const validChunks = s.mdOutput.split(/\n(?=【版型】|版型|\[Layout\]|Layout)/i).filter(c => c.trim().length > 0);
     
     // 🚀 核心邏輯：判斷第一個區塊是否為「前言/規格表」
-    // 如果第一個區塊不包含版型標籤，它就是 preamble
-    const hasPreamble = validChunks.length > 0 && !/(?:【版型】|版型|\[Layout\]|Layout)/i.test(validChunks[0]);
+    const hasPreamble = validChunks.length > 0 && !/^(?:【版型】|版型|\[Layout\]|Layout)/i.test(validChunks[0].trim());
     
     const preamble = hasPreamble ? validChunks[0] : "";
     const slides = hasPreamble ? validChunks.slice(1) : validChunks;
 
     try {
-      if (slides.length > 0) {
-        const firstSlidePrompt = PromptFactory.buildYamlTransform(preamble + slides[0], 1);
-        await generateFullScriptStream(firstSlidePrompt, undefined, (chunk) => set((state) => ({ yamlOutput: state.yamlOutput + chunk })), style.name);
-        set((state) => ({ yamlOutput: state.yamlOutput + '\n' }));
-      }
-      for (let i = 1; i < slides.length; i++) {
-        const chunkPrompt = PromptFactory.buildYamlChunkTransform(slides[i], i + 1);
-        await generateFullScriptStream(chunkPrompt, undefined, (chunk) => set((state) => ({ yamlOutput: state.yamlOutput + chunk })), style.name);
+      for (let i = 0; i < slides.length; i++) {
+        const slideIndex = i + 1;
+        // 第一頁使用 buildYamlTransform (包含 driver/metadata)，後續使用 buildYamlChunkTransform
+        const prompt = (i === 0) 
+          ? PromptFactory.buildYamlTransform(preamble + slides[i], slideIndex)
+          : PromptFactory.buildYamlChunkTransform(slides[i], slideIndex);
+        
+        await generateFullScriptStream(prompt, undefined, (chunk) => set((state) => ({ yamlOutput: state.yamlOutput + chunk })), style.name);
         set((state) => ({ yamlOutput: state.yamlOutput + '\n' }));
       }
     } catch (e) { set({ error: "YAML 轉譯失敗" }); } 
