@@ -5,6 +5,8 @@ import { OUTLINE_SCHEMA, DRAFT_SCHEMA, SLIDE_TOOLS_SCHEMA, SLIDE_ACTION_SCHEMA, 
 
 const ERROR_MESSAGE = "Bee老師目前休息中，請稍後再試。";
 
+let currentApiKeyIndex = 0;
+
 function getAI() {
   // 🚀 核心優化：從 localStorage 讀取多組金鑰並輪用
   let apiKeys: string[] = [];
@@ -31,8 +33,10 @@ function getAI() {
     throw new Error("API_KEY_MISSING");
   }
 
-  // 輪用邏輯：隨機選取一組金鑰，達到負載平衡與避開配額限制
-  const apiKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
+  // 輪用邏輯：依序選取一組金鑰 (Round-Robin)，達到負載平衡與避開配額限制
+  const apiKey = apiKeys[currentApiKeyIndex % apiKeys.length];
+  currentApiKeyIndex = (currentApiKeyIndex + 1) % apiKeys.length;
+  
   return new GoogleGenAI({ apiKey });
 }
 

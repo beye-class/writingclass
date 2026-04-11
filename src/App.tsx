@@ -317,7 +317,7 @@ ${store.mdOutput}
               
               <div className="space-y-5">
                 <p className="text-sm text-[var(--brown-mid)] font-medium leading-relaxed">
-                  Bee 老師現在支援 <strong>多組 API Key 輪用</strong>。系統會隨機切換金鑰以避開配額限制。
+                  Bee 老師現在支援 <strong>多組 API Key 輪用</strong>。系統會依序輪流切換金鑰 (Round-Robin) 以避開配額限制。
                 </p>
 
                 {store.apiKeys.length > 0 && (
