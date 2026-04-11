@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, AlertCircle, ChevronRight, ImageIcon, Upload, X, Sparkles, RefreshCw } from 'lucide-react';
+import { BookOpen, AlertCircle, ChevronRight, ImageIcon, Upload, X, Sparkles, RefreshCw, Trash2 } from 'lucide-react';
 import { gradeConfig } from '../data/grades';
 import { GENRES } from '../data/strategies';
 import { useAppStore } from '../store/useAppStore';
@@ -27,11 +27,32 @@ export default function Step1Config({
   showRules, setShowRules, error, handleGoStep2
 }: Step1ConfigProps) {
   const currentGrade = gradeConfig[grade as keyof typeof gradeConfig];
+  const { resetProjectSettings } = useAppStore();
 
   return (
     <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid md:grid-cols-12 gap-8">
       <div className="md:col-span-4 space-y-6">
         <div className="bg-white p-6 rounded-3xl border border-[var(--border)] shadow-sm space-y-6">
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-black text-[var(--brown-deep)]">基礎設定</h2>
+              <p className="text-[var(--brown-mid)] font-medium">讓我們開始規劃您的教學主題</p>
+            </div>
+            
+            {/* 🚀 新增：一鍵清空按鈕 */}
+            <button
+              onClick={() => {
+                if (confirm('確定要清空所有已輸入的設定資料嗎？(包含題目、筆記與原詩)')) {
+                  resetProjectSettings();
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 text-xs font-black text-red-400 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
+            >
+              <Trash2 size={14} />
+              清空所有輸入
+            </button>
+          </div>
+
           <div className="space-y-3">
             <label className="text-xs font-black uppercase tracking-widest text-[var(--brown-light)] flex items-center gap-2">
               <BookOpen size={14} /> 選擇年級

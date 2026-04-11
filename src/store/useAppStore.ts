@@ -105,6 +105,7 @@ interface ProjectSlice {
   handleGenerateForkDetails: (pIdx: number) => Promise<void>; handleSmoothTransitions: () => Promise<void>;
   handleValidateSentences: () => Promise<void>; handleClearDrafts: () => void; handleSendSocratic: () => Promise<void>;
   handleRefineOutline: () => Promise<void>; handleStartSocratic: () => Promise<void>; handleDeconstructPoem: () => Promise<void>;
+  resetProjectSettings: () => void;
 }
 
 const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set, get) => ({
@@ -364,6 +365,26 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
       set({ socraticHistory: [{ role: 'ai', content: res }] }); 
     } 
     catch (e) { handleError(set, e, '啟動失敗'); } finally { set({ isSocraticLoading: false }); }
+  },
+
+  resetProjectSettings: () => {
+    set({
+      topic: '',
+      notes: '',
+      originalPoem: '',
+      poemStructure: '',
+      image: null,
+      genres: [],
+      skills: [],
+      rhetoricSkills: [],
+      outline: [],
+      drafts: [],
+      mdOutput: '',
+      yamlOutput: '',
+      socraticHistory: [],
+      error: null,
+      step: 1
+    });
   }
 });
 
