@@ -32,31 +32,16 @@ export default function DraftCard({
   updateQuestions
 }: DraftCardProps) {
   
-  const validationTimer = useRef<any>(null);
-  const forkValidationTimers = useRef<Record<number, any>>({});
-
   // 安全更新嵌套物件
   const updateNestedField = (parentField: 'toolsSlide' | 'actionSlide', childField: string, value: any) => {
     const updatedParent = { ...(para[parentField] || {}), [childField]: value };
     updateParaField(idx, parentField, updatedParent);
-
-    if (parentField === 'actionSlide' && childField === 'exampleSentence') {
-      if (validationTimer.current) clearTimeout(validationTimer.current);
-      validationTimer.current = setTimeout(() => {
-        handleValidateSentence(idx, value);
-      }, 1500); 
-    }
   };
 
   const updateForkPathSentence = (pIdx: number, value: string) => {
     const newPaths = [...para.paths];
     newPaths[pIdx] = { ...newPaths[pIdx], actionSlide: { ...newPaths[pIdx].actionSlide, exampleSentence: value } };
     updateParaField(idx, 'paths', newPaths);
-
-    if (forkValidationTimers.current[pIdx]) clearTimeout(forkValidationTimers.current[pIdx]);
-    forkValidationTimers.current[pIdx] = setTimeout(() => {
-      handleValidateSentence(idx, value, pIdx);
-    }, 1500);
   };
 
   return (
@@ -192,6 +177,13 @@ export default function DraftCard({
                 🦴 寫作示範例句 <span className="text-[8px] font-normal opacity-50 ml-1">(認知校準核心)</span>
               </label>
               <div className="flex gap-1.5">
+                <button 
+                  onClick={() => handleValidateSentence(idx, para.actionSlide?.exampleSentence || '')} 
+                  className="w-6 h-6 flex items-center justify-center bg-[var(--amber-light)] text-[var(--amber)] hover:bg-[var(--amber)] hover:text-white rounded-lg transition-all"
+                  title="檢查難度"
+                >
+                  <Shield size={14} />
+                </button>
                 <button 
                   onClick={() => handleAdjustSentence(idx, 'down')} 
                   className="w-6 h-6 flex items-center justify-center bg-[var(--coral-light)] text-[var(--coral)] hover:bg-[var(--coral)] hover:text-white rounded-lg transition-all"
@@ -418,6 +410,13 @@ export default function DraftCard({
                         <div className="flex items-center justify-between px-1">
                           <span className="text-[8px] font-black text-[var(--blue-deep)]">🦴 路徑示範例句</span>
                           <div className="flex gap-1">
+                            <button 
+                              onClick={() => handleValidateSentence(idx, path.actionSlide.exampleSentence, pIdx)}
+                              className="w-5 h-5 flex items-center justify-center bg-[var(--amber-light)] text-[var(--amber)] rounded-md hover:bg-[var(--amber)] hover:text-white transition-all"
+                              title="檢查難度"
+                            >
+                              <Shield size={10} />
+                            </button>
                             <button 
                               onClick={() => handleAdjustSentence(idx, 'down', pIdx)}
                               className="w-5 h-5 flex items-center justify-center bg-[var(--coral-light)] text-[var(--coral)] rounded-md hover:bg-[var(--coral)] hover:text-white transition-all"
