@@ -402,15 +402,15 @@ const createScriptSlice: StateCreator<SharedState, [], [], ScriptSlice> = (set, 
   mdOutput: '', yamlOutput: '', isGeneratingStream: false, isConverting: false,
   setMdOutput: (v) => set({ mdOutput: v }), setYamlOutput: (v) => set({ yamlOutput: v }), setIsGeneratingStream: (v) => set({ isGeneratingStream: v }),
   
-handleGenerate: async () => {
+  handleGenerate: async () => {
     const s = get();
     set({ loading: true, error: null, mdOutput: '', activeTab: 'preview', isGeneratingStream: true });
     globalAbortController = new AbortController();
 
     const currentGrade = gradeConfig[s.grade as keyof typeof gradeConfig];
     
-    // 🚀 1. 核心修正：合併所有皮膚庫進行搜尋，確保能抓到「王牌大律師」等通用皮膚
-    const allSkins = [...Object.values(skins).flat(), ...COMMON_REAL_SKINS];
+    // 🚀 1. 致命錯誤修正：直接使用 Object.values(skins).flat()，絕對不要加 COMMON_REAL_SKINS
+    const allSkins = Object.values(skins).flat();
     const skin = allSkins.find(sk => sk.id === s.skinId) || allSkins[0];
     
     const style = styleLib.find(st => st.id === s.styleId) || styleLib[0];
