@@ -1,0 +1,7 @@
+{
+  "name": "Bee老師🐝 作文教室 — 沉浸式腳本生成器0411",
+  "description": "全方位螺旋式國小寫作教學系統，支援 視覺風格與沉浸式敘事皮膚，自動生成 NotebookLM 教學腳本。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
