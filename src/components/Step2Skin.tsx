@@ -58,7 +58,7 @@ export default function Step2Skin({ grade, skinId, setSkinId, setStep }: Step2Sk
                 </div>
                 <div className="flex items-center gap-1 text-[8px] text-[var(--brown-mid)] bg-[var(--amber-light)]/50 px-2 py-0.5 rounded-full">
                   <Sparkles size={8} className="text-[var(--amber)]" />
-                  <span>專家提示：試試「像說故事一樣」、「扮演溫柔的奶奶」、「像 FBI 探員一樣嚴肅」或「講得像睡前故事一樣」</span>
+                  <span>專家提示：試試「像說故事一樣」、「用靈感碎片引導」、「扮演溫柔的奶奶」或「讓文字在雲朵上跳舞」</span>
                 </div>
               </div>
               <input

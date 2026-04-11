@@ -44,7 +44,6 @@ export const PROMPT_TEMPLATES = {
 1. 每個分歧路徑必須有獨特的教學維度（如：視覺 vs 聽覺，或 基礎 vs 進階）。
 2. 分歧內容必須保持核心主題一致，僅在描寫角度或難度上有所區別。`,
 
-  // 🚀 新增：詩歌專屬意象模塊法防呆 (加入物性邏輯)
   poemRules: `
 ## 🚨 詩歌骨架拆解最高準則：意象模塊法 (CRITICAL)
 絕對禁止使用 [名詞]、[動詞]、[形容詞] 這種死板的「詞性填空」來拆解詩歌！這會嚴重扼殺學生的創意與詩意。
@@ -63,7 +62,6 @@ export const PROMPT_TEMPLATES = {
 };
 
 export const PromptFactory = {
-  // 1. 基礎防呆與身分設定 (所有 Chunk 共用)
   buildBasePrompt: (
     skinName: string,
     tone: string,
@@ -90,7 +88,6 @@ export const PromptFactory = {
 ${masterBlueprint}
 `,
 
-  // 🚀 2. 開場 Chunk (Slide 0 & M1) - 已優化為緊湊合併版並強制顯示題目
   buildIntroChunk: (basePrompt: string, topic: string) => {
     return `${basePrompt}
 
@@ -110,7 +107,7 @@ ${masterBlueprint}
 請直接開始輸出 Markdown，必須嚴格標示【版型】。`;
   },
 
-  // 負責生成核心段落的腳本
+  // 🚀 已修復：多輪對話與錯誤範例對比 (Masterpiece vs. Disaster)
   buildParaChunk: (basePrompt: string, index: number, draft: any, batonSentence: string) => {
     return `${basePrompt}
 接續上一段的結尾：「${batonSentence}」
@@ -136,7 +133,6 @@ ${masterBlueprint}
 請確保對話生動有趣，充滿互動感！請直接輸出包含 【版型】、【AUDIO 聽覺腳本】與【VISUAL 視覺畫面】的 Markdown 內容。`;
   },
 
-  // 4. 分歧路徑 Chunk (Slide FK) - 🚀 合併 Q(提問) 與 E(分歧選擇)
   buildForkChunk: (basePrompt: string, index: number, paths: any[]) => {
     const forkContent = paths.map((path, pi) => `路徑 ${String.fromCharCode(65+pi)}: 詞彙: ${path.toolsSlide?.vocabList?.join('/')} / 例句: ${path.actionSlide?.exampleSentence}`).join('\n');
     return `${basePrompt}
@@ -157,13 +153,9 @@ ${masterBlueprint}
 ${forkContent}`;
   },
 
-  // 5. 結尾 Chunk (Slide E1 & E2)
   buildOutroChunk: (basePrompt: string, batonSentence?: string) => 
     `${basePrompt}\n\n【當前任務：請嚴格依照 Master Blueprint 中的 TYPE_F1 與 TYPE_F2 版型，生成 Slide E1 與 Slide E2】\n\n${batonSentence ? `⚠️ 敘事接力棒：上一段結尾是：「${batonSentence}」。請以此流暢地轉入結尾總結與任務檢核。` : ''}`,
 
-  // --- 🚀 擴充：專屬任務 Prompt ---
-
-  // 7. 蘇格拉底引導 (脫離投影片排版綁架) - 🚀 敏捷提案升級版 (強制破除鬼打牆)
   buildSocraticPrompt: (gradeLabel: string, topic: string, genre: string, notes: string, history: any[], originalPoem?: string) => {
     return `你是「Bee老師」，一位精通教學設計與敘事引導的寫作專家，說話語氣親切、睿智、專業。
 你正處於引導老師建立「${gradeLabel}」學生寫作大綱的關鍵階段。
@@ -204,7 +196,6 @@ ${history.map((m: any) => `${m.role === 'user' ? '老師' : 'Bee老師'}: ${m.co
 請嚴格根據【最高強制邏輯判斷】回傳你的回覆。如果老師已經要求生成，請立刻給出具體草案，絕對不要再反問問題！`;
   },
 
-  // 8. 大綱生成 (脫離投影片排版綁架)
   buildOutlinePrompt: (topic: string, genre: string, gradeLabel: string, skills: string[], notes: string, imageInstruction: string, sensoryInstruction: string, rhetoricSkills: string[] = []) => {
     
     const rhetoricInstruction = (skills.includes('修辭運用') && rhetoricSkills.length > 0)
@@ -227,15 +218,20 @@ ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴�
 請回傳符合 OUTLINE_SCHEMA 的 JSON 陣列。`;
   },
 
-  // 9. 草稿生成 (Drafting)
   buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
     const base = PromptFactory.buildBasePrompt(skin.name, skin.tone, skin.metaphor.vocab, skin.metaphor.sentence, "預設風格", "無");
     
+// 🚀 新增：捨棄死板字數，改用語感、意群與原詩鏡像來強制排版
     const isPoem = genre.includes('詩');
     const fullExampleRule = isPoem 
-      ? `2. **fullExample (完整範文)**：必須是一小節「純粹的童詩」。字數要精煉，必須強制使用分行。🚨 必須是一首自然、完整的詩，【絕對禁止】出現任何【】括號或填空提示！`
+      ? `2. **fullExample (完整範文)**：【🚨 詩歌排版絕對指令】必須是一小節純粹的童詩！
+   - ⚠️ 節奏與斷行：請捨棄死板的字數限制！改以「意群（一個完整的畫面或動作）」或「呼吸停頓點」來分行。
+   - ⚠️ 原詩鏡像：請觀察原詩該小節的長短句交錯方式。原詩若有長句結尾，範文也應有優美的長句收尾。
+   - ⚠️ 強制斷行：【絕對必須】在每一個斷句的結尾加上換行符號（\\n），保持詩的視覺階梯感！
+   - ⭕ 正確範例：「在微風輕輕吹拂的早晨，\\n小溪流開心地向前奔跑，\\n它就像一條閃亮的彩帶，\\n溫柔地灌溉著每一寸乾渴的青草。」
+   - ❌ 災難範例（連續散文）：在微風輕輕吹拂的早晨，小溪流開心地向前奔跑，它就像一條閃亮的彩帶，溫柔地灌溉著每一寸乾渴的青草。
+   - 🚨 必須是一首自然、完整的詩，【絕對禁止】寫成散文，且【絕對禁止】出現任何【】括號！`
       : `2. **fullExample (完整範文)**：必須是一段「完整的文章段落」。長度必須大於示範例句。🚨 必須是流暢的文章，【絕對禁止】出現任何【】括號或填空提示！`;
-
     return `${base}
 你是「Bee老師」寫作教學助手。
 ## 敘事皮膚設定 (嚴格執行皮骨分離)
@@ -268,7 +264,6 @@ ${outlineContext}${sensoryContext}
 大綱共有 ${outlineLength} 個段落。請為大綱中的【每一個】段落生成對應的草稿內容，回傳一個包含 ${outlineLength} 個物件的 JSON 陣列。嚴禁只生成部分段落或中斷生成！`;
   },
 
-  // 10. 難度調整
   buildAdjustDifficultyPrompt: (sentence: string, gradeLabel: string, targetDir: string) => {
     const base = PromptFactory.buildBasePrompt("Bee老師", "專業、精確", "詞彙替換", "句型重組", "預設風格", "無");
     return `${base}
@@ -284,7 +279,6 @@ ${PROMPT_TEMPLATES.gradeSpecs}
 請直接回傳修改後的句子。`;
   },
 
-  // 11. 認知校準檢查
   buildValidateSentencePrompt: (sentence: string, gradeLabel: string) => {
     const base = PromptFactory.buildBasePrompt("Bee老師", "嚴格、專業", "認知校準", "修辭檢查", "預設風格", "無");
     return `${base}
@@ -313,7 +307,6 @@ ${PROMPT_TEMPLATES.gradeSpecs}
 請直接回傳 JSON 物件。`;
   },
 
-  // 12. 重新設計分歧路徑 (強化版：支援不同主題舉例)
   buildRegenerateForkPrompt: (topic: string, genre: string, gradeLabel: string, paraTitle: string, dimension: string, newForkPaths: number, feedback?: string) => {
     const base = PromptFactory.buildBasePrompt("Bee老師", "專業、創意", "分歧設計", "教學路徑", "預設風格", "無");
     
@@ -340,7 +333,6 @@ ${feedback ? `💬 教師額外要求：${feedback}` : ""}
 請嚴格區分 toolsSlide(裝備) 與 actionSlide(演練)，並回傳符合 DRAFT_SCHEMA 格式的單個段落 JSON 物件（放在陣列中）。`;
   },
   
-  // 13. 新增教學段落
   buildSingleParagraphPrompt: (topic: string, genre: string, gradeLabel: string, existingTitles: string[]) => {
     const base = PromptFactory.buildBasePrompt("Bee老師", "專業、連貫", "段落新增", "教學結構", "預設風格", "無");
     return `${base}
@@ -350,12 +342,11 @@ ${PROMPT_TEMPLATES.gradeSpecs}
 ${PROMPT_TEMPLATES.forkRules}
 
 題目：${topic} (${genre})，年級：${gradeLabel}
-現有段落：${existingTitles.join(' -> ')}
+現現有段落：${existingTitles.join(' -> ')}
 
 請嚴格區分 toolsSlide(裝備) 與 actionSlide(演練)，回傳一個符合 DRAFT_SCHEMA 格式的單個段落 JSON 物件（放在陣列中）。`;
   },
 
-  // 14. 重寫段落
   buildRegenerateParagraphPrompt: (topic: string, genre: string, gradeLabel: string, paraTitle: string, feedback: string) => {
     const base = PromptFactory.buildBasePrompt("Bee老師", "專業、修正", "段落重寫", "教學優化", "預設風格", "無");
     return `${base}
@@ -379,7 +370,6 @@ ${genre.includes('詩歌仿寫') ? PROMPT_TEMPLATES.poemRules : ''}
 請嚴格區分 toolsSlide(裝備) 與 actionSlide(演練)，回傳一個符合 DRAFT_SCHEMA 格式的單個段落 JSON 物件（放在陣列中）。`;
   },
 
-  // 15. 生成詳細分歧內容
   buildDetailedForkPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, paraTitle: string, paraFocus: string, pathsInfo: string) => {
     const base = PromptFactory.buildBasePrompt(skin.name, skin.tone, skin.metaphor.vocab, skin.metaphor.sentence, "預設風格", "無");
     return `${base}
@@ -393,7 +383,6 @@ ${pathsInfo}
 請直接回傳符合 FORK_PATH_SCHEMA 結構的 JSON 陣列。`;
   },
 
-  // 16. 段落銜接優化
   buildSmoothTransitionsPrompt: (gradeLabel: string, skinName: string, draftContext: string) => {
     const base = PromptFactory.buildBasePrompt(skinName, "專業、流暢", "轉折優化", "邏輯銜接", "預設風格", "無");
     return `${base}
@@ -412,7 +401,6 @@ ${draftContext}
 請回傳符合 DRAFT_SCHEMA 的完整 JSON 陣列，內容為優化後的段落。`;
   },
 
-  // 17. 對話轉大綱 (Refine Outline)
   buildRefineOutlinePrompt: (topic: string, genre: string, gradeLabel: string, notes: string, history: any[], thinkingTool: string, originalPoem: string = '', rhetoricSkills: string[] = []) => {
     const rhetoricText = rhetoricSkills.length > 0 ? `\n- 指定修辭技巧：${rhetoricSkills.join('、')}` : '';
     return `你是「Bee老師」寫作教學專家。
@@ -437,14 +425,20 @@ ${history.map((m: any) => `${m.role === 'user' ? '老師' : 'Bee老師'}: ${m.co
 請回傳符合 OUTLINE_SCHEMA 的 JSON 陣列。`;
   },
 
-  // 🚀 18. YAML 轉譯 (首頁+大綱) - V-MAX 裝甲強化版 (NotebookLM 雙重洗腦)
+  // 🚀 18. YAML 轉譯 (首頁+大綱) - 軍事化格式鎖定版
   buildYamlTransform: (markdownContent: string, slideIndex: number = 1) => {
     return `請將以下 Markdown 內容轉換為 NotebookLM 專用的 YAML 結構。
 
-【YAML 輸出格式要求】：
-請直接輸出合法的 YAML 字串，不要使用 \`\`\`yaml 標籤包覆，也不要加上任何額外的說明文字。
+【🚨 最高強制排版鐵律 (CRITICAL)】：
+1. 絕對禁止任何寒暄、問候或說明文字（嚴禁說「好的」、「為您轉換」）。
+2. 不要使用 \`\`\`yaml 標籤包覆，請直接輸出純文字 YAML。
+3. 每個 Slide 必須嚴格只有以下四個 Key，【絕對禁止發明新 Key】（如 components, title, focus 等）：
+   - \`slide_number\` (必須為 "P${slideIndex}")
+   - \`layout_type\` (提取 TYPE_A, TYPE_Q 等)
+   - \`audio_script\` (字串，包含所有主持人對話)
+   - \`visual_layer\` (陣列，項目只能是 type: "text_overlay" 或 type: "image")
 
-\`\`\`yaml
+【✅ YAML 輸出格式模板（請完全照抄此結構）】：
 notebooklm_driver:
   system_role: "【最高指導原則】1. [文字逐字鎖定]: 投影片畫面的文字，必須 100% 一字不漏地複製 visual_layer 內容，絕對禁止自行刪減、潤飾或翻譯。 2. [排版強制防呆]: 嚴格遵守 ui_layout_protocol，禁止多圖拼貼導致字體縮小。 3. [懸浮標籤]: 若內容包含【標籤】，獨立繪製為右上角 Badge。"
   ui_layout_protocol:
@@ -464,32 +458,44 @@ metadata:
     tiers: { down: "#52B788", core: "#E8A84C", up: "#5B8FC4" }
 
 slides:
-\`\`\`
-
-## 轉換規則：
-1. 將 Markdown 中的每一頁 Slide 轉換為陣列項目 (\`- slide_number: ...\`)。
-2. 每個 Slide 必須包含以下精確的 Key：
-   - \`slide_number\`: 🚨 嚴格輸出 "P${slideIndex}" (絕對不可輸出 Slide 0, M1 等內部代號)
-   - \`layout_type\`: 提取 TYPE_A, TYPE_Q 等代碼
-   - \`audio_script\`: 提取 🎧 【AUDIO 聽覺腳本】的對話內容
-   - \`visual_layer\`: 這是一個陣列，請將 🖥️ 【VISUAL 視覺畫面】的內容拆解填入：
-     - \`type: "image"\`, \`description: "..."\`
-     - \`type: "text_overlay"\`, \`content: "..."\`
+  - slide_number: "P${slideIndex}"
+    layout_type: "【填入版型代碼】"
+    audio_script: |
+      Host 1：「對話內容...」
+      Host 2：「對話內容...」
+    visual_layer:
+      - type: "text_overlay"
+        content: "【填入畫面上的文字、金句或列表】"
+      - type: "image"
+        description: "【填入 Gemini Prompt 圖片提示詞】"
 
 ## 以下是待轉換的 Markdown 內容：
 ${markdownContent}`;
   },
 
-  // 18.1 YAML 轉譯單個分片 (不含 metadata 與 driver)
+  // 🚀 18.1 YAML 轉譯單個分片 - 軍事化格式鎖定版
   buildYamlChunkTransform: (mdChunk: string, slideIndex: number) => 
     `🏗️ Role: NotebookLM 專業簡報架構師 (v10.0)
 請將以下 Markdown 分片轉換為 YAML 格式。
-**注意：因為是接續前面的內容，絕對不要輸出 notebooklm_driver 與 metadata 區塊，直接輸出 \`slides:\` 下方的列表項。**
 
-🚨 本頁的序號必須強制設定為：
+【🚨 最高強制排版鐵律 (CRITICAL)】：
+1. **絕對禁止聊天**：嚴禁說「好的」、「接下來為您轉換」，請直接輸出 YAML 字串。
+2. **嚴格欄位鎖定**：只能有 \`slide_number\`, \`layout_type\`, \`audio_script\`, \`visual_layer\` 這四個第一層級的 Key，絕對禁止發明其他 Key。
+3. **visual_layer 陣列化**：visual_layer 必須是陣列，裡面的項目只能是 \`type: "text_overlay"\` 或 \`type: "image"\`。
+
+**注意：因為是接續前面的內容，絕對不要輸出 notebooklm_driver 與 metadata 區塊，也不要輸出 \`slides:\`，請直接從 \`- slide_number\` 開始輸出。**
+過濾掉所有 Markdown \`\`\`yaml 代碼標記。
+
+【✅ 正確的輸出示範】：
 - slide_number: "P${slideIndex}"
-
-請保持 \`audio_script\` 與 \`visual_layer\` 嚴格分離的結構。過濾掉所有 Markdown code block 標記。
+  layout_type: "【版型代碼】"
+  audio_script: |
+    【對話內容...】
+  visual_layer:
+    - type: "text_overlay"
+      content: "【文字內容】"
+    - type: "image"
+      description: "【圖片提示詞】"
 
 待轉換分片：
 ${mdChunk}`

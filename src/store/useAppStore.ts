@@ -214,9 +214,15 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
   
   handleValidateSentence: async (idx, s, pIdx?: number) => {
     if (!s.trim()) return;
+    
+    const store = get();
+    // 🚀 1. 點擊瞬間給予回饋
+    store.showToast("🔍 AI 正在分析句子難度...", "info");
+
     try {
-      const res = await validateSentence(s, gradeConfig[get().grade as keyof typeof gradeConfig].label);
-      const next = [...get().drafts]; 
+      const res = await validateSentence(s, gradeConfig[store.grade as keyof typeof gradeConfig].label);
+      const next = [...store.drafts]; 
+      
       if (pIdx !== undefined) {
         const nextPaths = [...next[idx].paths];
         nextPaths[pIdx] = { 
@@ -233,7 +239,18 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
         };
       }
       set({ drafts: next });
-    } catch (e) {}
+
+      // 🚀 2. 檢查完畢後給予明確的結果提示
+      if (res.isValid) {
+        store.showToast("✅ 難度適中！完美符合該年級程度。", "success");
+      } else {
+        store.showToast("⚠️ 發現難度落差，請參考下方出現的提示！", "error");
+      }
+
+    } catch (e) {
+      // 🚀 3. 攔截錯誤並通知使用者
+      store.showToast("❌ 難度分析失敗，請稍後再試", "error");
+    }
   },
 
   handleAdjustSentence: async (idx, dir, pIdx) => {
