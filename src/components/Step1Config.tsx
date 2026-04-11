@@ -33,23 +33,22 @@ export default function Step1Config({
     <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid md:grid-cols-12 gap-8">
       <div className="md:col-span-4 space-y-6">
         <div className="bg-white p-6 rounded-3xl border border-[var(--border)] shadow-sm space-y-6">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
             <div className="space-y-1">
               <h2 className="text-3xl font-black text-[var(--brown-deep)]">基礎設定</h2>
               <p className="text-[var(--brown-mid)] font-medium">讓我們開始規劃您的教學主題</p>
             </div>
             
-            {/* 🚀 新增：一鍵清空按鈕 */}
             <button
               onClick={() => {
-                if (confirm('確定要清空所有已輸入的設定資料嗎？(包含題目、筆記與原詩)')) {
+                if (window.confirm('🐝 Bee老師提醒：確定要清空所有已輸入的資料嗎？(包含題目、筆記與原詩)')) {
                   resetProjectSettings();
                 }
               }}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-black text-red-400 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
+              className="flex items-center gap-2 px-5 py-2.5 text-xs font-black text-red-500 hover:bg-red-50 rounded-2xl transition-all border border-red-100 hover:border-red-200 shadow-sm bg-white"
             >
-              <Trash2 size={14} />
-              清空所有輸入
+              <Trash2 size={16} />
+              一鍵清空
             </button>
           </div>
 

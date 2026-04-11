@@ -402,17 +402,34 @@ const createScriptSlice: StateCreator<SharedState, [], [], ScriptSlice> = (set, 
   mdOutput: '', yamlOutput: '', isGeneratingStream: false, isConverting: false,
   setMdOutput: (v) => set({ mdOutput: v }), setYamlOutput: (v) => set({ yamlOutput: v }), setIsGeneratingStream: (v) => set({ isGeneratingStream: v }),
   
-  handleGenerate: async () => {
+handleGenerate: async () => {
     const s = get();
     set({ loading: true, error: null, mdOutput: '', activeTab: 'preview', isGeneratingStream: true });
     globalAbortController = new AbortController();
 
     const currentGrade = gradeConfig[s.grade as keyof typeof gradeConfig];
-    const skin = (skins[s.grade as keyof typeof skins] || []).find(sk => sk.id === s.skinId) || (skins[s.grade as keyof typeof skins] || [])[0];
+    
+    // 🚀 1. 核心修正：合併所有皮膚庫進行搜尋，確保能抓到「王牌大律師」等通用皮膚
+    const allSkins = [...Object.values(skins).flat(), ...COMMON_REAL_SKINS];
+    const skin = allSkins.find(sk => sk.id === s.skinId) || allSkins[0];
+    
     const style = styleLib.find(st => st.id === s.styleId) || styleLib[0];
     const tool = THINKING_TOOLS_DETAILED.find(t => t.name === s.thinkingTool);
     const layout = layoutSkills?.find(l => l.id === 'skel-v8') || layoutSkills[0];
     
+    const skinTone = s.customTones[s.skinId] ?? skin.tone;
+
+    // 🚀 2. 動態人設發動：根據不同皮膚，賦予 Host 2 不同的靈魂
+    let host2Role = "The 'Curious Apprentice' coach. Asks innocent questions, tries to write but sometimes writes too plainly or literally, allowing Host 1 to refine it into a masterpiece.";
+    
+    if (skin.type === 'fun') {
+      host2Role = "The 'Messy/Chaotic' coach. Energetic but often gives literal, exaggerated, or funny bad examples showing what happens when the technique goes wrong.";
+    } else if (s.skinId === 'lawyer') {
+      host2Role = "The 'Intern Lawyer'. Sometimes makes logical leaps or weak arguments that Host 1 has to object to and fix with strong evidence.";
+    } else if (s.skinId === 'news_anchor') {
+      host2Role = "The 'Field Reporter'. Gives raw, unpolished, and slightly panicked on-site observations that Host 1 refines into professional news copy.";
+    }
+
     const layoutConfigObj = {
       styleId: style.id, styleName: style.name, gradeLabel: currentGrade.label, genres: s.genres.join('、'),
       thinkingTool: s.thinkingTool, skinnedToolName: tool?.skinMapping[s.skinId] || s.thinkingTool,
@@ -421,7 +438,6 @@ const createScriptSlice: StateCreator<SharedState, [], [], ScriptSlice> = (set, 
 
     const layoutSpecTable = layout ? layout.generateSpecTable(layoutConfigObj) : "";
     const masterBlueprint = layout ? layout.generateTemplate(layoutConfigObj) : "";
-    const skinTone = s.customTones[s.skinId] ?? skin.tone;
 
     const basePrompt = PromptFactory.buildBasePrompt(
       skin.name, skinTone, skin.metaphor.vocab, 
@@ -430,7 +446,7 @@ const createScriptSlice: StateCreator<SharedState, [], [], ScriptSlice> = (set, 
 
     let batonSentence = "接下來，讓我們一起進入這段精彩的旅程吧！"; 
 
-    // 🚀 核心優化：動態生成 NotebookLM Audio 客製化指令 (不閒扯、高聚焦對比)
+    // 🚀 3. 組裝動態 Audio Prompt (從寫死 Ah Jie 改為動態人設)
     const audioPrompt = `## 🎙️ NotebookLM Audio 語音生成專用指令 (請複製貼上至 Customize 框)
 \`\`\`text
 Strictly generate a role-play dialogue in Traditional Chinese (Taiwanese Mandarin).
@@ -443,19 +459,21 @@ Strictly generate a role-play dialogue in Traditional Chinese (Taiwanese Mandari
 You are acting as two writing coaches. You are teaching students how to write about "${s.topic}" using **${s.skills.join(', ')}**.
 
 **Characters:**
-1.  **Host 1 (${skin.name} Coach):** The "Professional" coach. Focuses on BEAUTY and structure. Uses specific writing vocabulary and metaphors like "${skin.metaphor.vocab}".
-2.  **Host 2 (Ah Jie):** The "Messy/Curious" coach. Focuses on DISASTER. Often provides a bad or literal example (e.g., chaotic action, messy writing) that Host 1 has to fix.
+1.  **Host 1 (${skin.name} Coach):** The "Professional" coach. Focuses on BEAUTY and structure. Uses metaphors like "${skin.metaphor.vocab}".
+2.  **Host 2 (Co-Host):** ${host2Role}
 
 **Content Flow (Follow this strictly):**
-1.  **Immediate Hook:** Host 1 sets the beautiful scene for "${s.topic}". Host 2 interrupts with a funny, chaotic observation.
-2.  **The Technique:** Explain the core writing skills. Don't just list them, demonstrate them!
+1.  **Immediate Hook:** Host 1 sets the scene for "${s.topic}" as ${skin.name}. Host 2 interrupts with a funny or curious observation.
+2.  **The Technique:** Explain writing skills.
 3.  **The Examples (Masterpiece vs. Disaster):**
     * **Host 1's Example (Beautiful):** Provide a vivid, well-structured example based on the text.
-    * **Host 2's Example (Funny):** Provide a chaotic, messy example showing what happens when the technique goes wrong.
+    * **Host 2's Example (Funny/Literal):** Provide a chaotic or literal example showing what happens when the technique goes wrong.
 4.  **The Conclusion:** Tell students to look at their own experiences. Give a strong call to action!
 
-**Tone:** Creative, chaotic, funny. Focus on VISUAL details and techniques. Do not stray off-topic.
+**Tone:** ${skinTone}. Focus on VISUAL details and techniques. Do not stray off-topic.
 \`\`\``;
+
+
 
     try {
       // 🚀 將 Audio 指令印在 Markdown 最頂端
