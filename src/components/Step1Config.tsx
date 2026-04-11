@@ -11,7 +11,7 @@ interface Step1ConfigProps {
   skills: string[]; toggleSkill: (s: string) => void;
   topic: string; setTopic: (t: string) => void;
   notes: string; setNotes: (n: string) => void;
-  originalPoem: string; setOriginalPoem: (p: string) => void; // 🚀 新增：原詩專屬狀態
+  originalPoem: string; setOriginalPoem: (p: string) => void; 
   poemStructure: string; setPoemStructure: (p: string) => void;
   image: string | null; setImage: (img: string | null) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -22,12 +22,20 @@ interface Step1ConfigProps {
 
 export default function Step1Config({
   grade, setGrade, genres, toggleGenre, skills, toggleSkill,
-  topic, setTopic, notes, setNotes, originalPoem, setOriginalPoem, poemStructure, setPoemStructure, // 🚀 新增：解構屬性
+  topic, setTopic, notes, setNotes, originalPoem, setOriginalPoem, poemStructure, setPoemStructure, 
   image, setImage, handleImageUpload,
   showRules, setShowRules, error, handleGoStep2
 }: Step1ConfigProps) {
+  
   const currentGrade = gradeConfig[grade as keyof typeof gradeConfig];
-  const { resetProjectSettings } = useAppStore();
+  
+  // 🚀 核心修正：將所有會用到的 Hook 狀態提取到最頂層宣告！
+  // 絕對不可將 useAppStore() 放在 if 或 && 等條件渲染裡面
+  const { 
+    resetProjectSettings, 
+    isDeconstructingPoem, 
+    handleDeconstructPoem 
+  } = useAppStore();
 
   return (
     <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid md:grid-cols-12 gap-8">
@@ -195,12 +203,12 @@ export default function Step1Config({
                       🧩 請輸入要保留的句型結構 (詩歌仿寫專用)
                     </label>
                     <button
-                      onClick={useAppStore.getState().handleDeconstructPoem}
-                      disabled={useAppStore(s => s.isDeconstructingPoem) || !originalPoem.trim()}
+                      onClick={handleDeconstructPoem} // 🚀 使用頂層的變數
+                      disabled={isDeconstructingPoem || !originalPoem.trim()} // 🚀 使用頂層的變數
                       className="flex items-center gap-1 text-xs font-bold text-[var(--blue-deep)] bg-[var(--blue-light)] hover:bg-[var(--blue-mid)] hover:text-white px-3 py-1.5 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {useAppStore(s => s.isDeconstructingPoem) ? <RefreshCw size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                      {useAppStore(s => s.isDeconstructingPoem) ? '拆解中...' : 'AI 幫我拆解'}
+                      {isDeconstructingPoem ? <RefreshCw size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                      {isDeconstructingPoem ? '拆解中...' : 'AI 幫我拆解'}
                     </button>
                   </div>
                   <textarea 

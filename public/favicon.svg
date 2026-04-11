@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Wings -->
+  <path d="M16 14 C10 4, 2 12, 12 18 Z" fill="#E0F7FA" stroke="#B2EBF2" stroke-width="1"/>
+  <path d="M16 14 C22 4, 30 12, 20 18 Z" fill="#E0F7FA" stroke="#B2EBF2" stroke-width="1"/>
+  <!-- Body -->
+  <rect x="10" y="14" width="12" height="14" rx="6" fill="#FFC107"/>
+  <!-- Stripes -->
+  <path d="M10 18 L22 18" stroke="#212121" stroke-width="2"/>
+  <path d="M10 22 L22 22" stroke="#212121" stroke-width="2"/>
+  <!-- Head -->
+  <circle cx="16" cy="14" r="5" fill="#FFC107"/>
+  <!-- Eyes -->
+  <circle cx="14" cy="13" r="1.5" fill="#212121"/>
+  <circle cx="18" cy="13" r="1.5" fill="#212121"/>
+  <!-- Smile -->
+  <path d="M15 16 Q16 17 17 16" fill="none" stroke="#212121" stroke-width="1"/>
+  <!-- Antennae -->
+  <path d="M14 9 Q12 6 10 7" fill="none" stroke="#212121" stroke-width="1"/>
+  <circle cx="10" cy="7" r="1" fill="#212121"/>
+  <path d="M18 9 Q20 6 22 7" fill="none" stroke="#212121" stroke-width="1"/>
+  <circle cx="22" cy="7" r="1" fill="#212121"/>
+  <!-- Stinger -->
+  <path d="M16 28 L15 31 L17 31 Z" fill="#212121"/>
+</svg>
