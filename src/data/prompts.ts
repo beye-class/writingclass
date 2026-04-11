@@ -233,6 +233,13 @@ ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴�
   // 9. 草稿生成 (Drafting)
   buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
     const base = PromptFactory.buildBasePrompt(skin.name, skin.tone, skin.metaphor.vocab, skin.metaphor.sentence, "預設風格", "無");
+    
+    // 🚀 新增：動態判斷是否為詩歌，給予完全不同的範文長度與排版指令
+    const isPoem = genre.includes('詩');
+    const fullExampleRule = isPoem 
+      ? `2. **fullExample (完整範文)**：必須是一小節「純粹的童詩」。【🚨 絕對禁止寫成散文或長篇大論！】字數要精煉，必須強制使用分行（維持詩的排版與節奏感），保留原詩的輕盈感。`
+      : `2. **fullExample (完整範文)**：這必須是一段「完整的文章段落」。它必須【包含並延伸】上述的 exampleSentence，請為它加上前後文、情境鋪陳或情感收尾。完整範文的長度必須大於示範例句！`;
+
     return `${base}
 你是「Bee老師」寫作教學助手。
 ## 敘事皮膚設定 (嚴格執行皮骨分離)
@@ -242,7 +249,7 @@ ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴�
 ${PROMPT_TEMPLATES.gradeRules}
 ${PROMPT_TEMPLATES.gradeSpecs}
 ${PROMPT_TEMPLATES.forkRules}
-${genre.includes('詩歌仿寫') ? PROMPT_TEMPLATES.poemRules : ''}
+${isPoem ? PROMPT_TEMPLATES.poemRules : ''}
 ${skin.id === 'little_poet' ? `\n👉 【小詩人專屬指令】：請將所有死板的文法解說，轉化為「尋找靈感碎片」、「文字跳舞步法」等童趣且具象的引導語。句子越短越好，留白越多越好。` : ''}
 
 ## ❓ 提問鏈設計要求 (Questioning Chain)
@@ -255,7 +262,7 @@ ${skin.id === 'little_poet' ? `\n👉 【小詩人專屬指令】：請將所有
 ## 📝 產出欄位嚴格定義 (Critical Field Relations)
 在生成 actionSlide (實戰演練) 時，請嚴格遵守以下層次關係，【絕對禁止】偷懶複製貼上：
 1. **exampleSentence (示範例句)**：這是一句「單一且精煉」的句子，純粹用來示範本段的核心技法。
-2. **fullExample (完整範文)**：這必須是一段「完整的段落（或完整詩歌小節）」。它必須【包含並延伸】上述的 exampleSentence，請為它加上前後文、情境鋪陳或情感收尾。完整範文的長度必須大於示範例句！
+${fullExampleRule}
 3. **scaffolding (寫作急救站)**：必須提供對應 fullExample 的「意象模塊引導骨架」，用【】標示可替換的具體元素。
 
 題目：${topic} (${genre})，年級：${gradeLabel}
