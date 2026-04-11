@@ -110,33 +110,30 @@ ${masterBlueprint}
 請直接開始輸出 Markdown，必須嚴格標示【版型】。`;
   },
 
-  // 3. 核心教學三聯彈 (Q 提問 + C 裝備 + D 實戰)
-  buildParaChunk: (basePrompt: string, index: number, para: DraftParagraph, batonSentence?: string) => {
-    const questionsContext = para.questions && para.questions.length > 0 && para.questions.some(q => q.trim() !== '')
-      ? `老師已設定以下提問鏈，請根據這些提問來設計本頁對話與畫面：\n${para.questions.map((q, i) => `${i+1}. ${q}`).join('\n')}` 
-      : `請為本段設計 3 個由淺入深的提問階梯（1. Level 1 觀察、2. Level 2 聯想、3. Level 3 核心）。`;
-
-    const paraContent = `[第 ${index} 段] 標題: ${para.title}\n教學重點: ${para.focus}\n詞彙: ${para.toolsSlide?.vocabList?.join('/')}\n句型: ${para.toolsSlide?.structure}\n範文內容: ${para.actionSlide?.fullExample}`;
-    
+  // 負責生成核心段落的腳本
+  buildParaChunk: (basePrompt: string, index: number, draft: any, batonSentence: string) => {
     return `${basePrompt}
+接續上一段的結尾：「${batonSentence}」
 
-【當前任務：請為第 ${index} 段生成「提問組頁(Q)」、「裝備頁(C)」與「實戰頁(D)」】
+請嚴格依照【版型】格式，產出第 ${index} 個段落的教學腳本。
+本段的寫作重點是：${draft.focus}
+本段的示範例句是：${draft.actionSlide?.exampleSentence || ''}
+本段的完整範文是：${draft.actionSlide?.fullExample || ''}
 
-## 📝 TYPE_Q (提問組) 特別執行指令
-${questionsContext}
-問題的答案必須直接連結到本段的重點詞彙或句型，引導學生在腦中形成畫面。
+【🎧 AUDIO 聽覺腳本對話生成規則 (🚨極度重要🚨)】
+請為 Host 1 與 Host 2 撰寫「多輪對話」（至少來回 2~3 次，絕對不要只有各講一句就結束）。
+必須嚴格遵守以下人設與對話流程，【嚴禁角色同化】：
 
-## 🎨 圖片提示詞 (Gemini Prompt) 構圖鐵律：【輔助聯想 ＆ 絕對隔離】
-1. 【認知鷹架】：圖片的唯一任務是「幫助學生思考與聯想」！請緊扣本段的「提問」、「句型」或「範文」，提取最真實、最具畫面感的情境（例如：狂風中開花的雨傘、努力奔跑滿頭大汗的同學）作為圖片主體 (Subject)。
-2. 【⚠️ 嚴禁皮膚干擾】：無論本堂課的「敘事皮膚」是魔法、Podcast 還是小廚師，圖片中【絕對不可以】出現魔法道具、麥克風、攝影棚或主持人！圖片必須 100% 呈現「學生文章要寫的真實情境內容」，絕不能與皮膚人設污染。
+1. **Host 1 (專業導師)**：語氣優美，負責引導、拋出靈感碎片，並在最後展示完美的「完整範文」。
+2. **Host 2 (天真學徒)**：【絕對禁止】講出專業的寫作術語（如：畫面感、修辭、動態）。他必須表現得像個初學者，會問天真的問題。
+3. **必備的對比環節 (Disaster vs. Masterpiece)**：
+   - 🗣️ **[第一輪]** Host 1 拋出本段的觀察重點或提問。
+   - 🗣️ **[第一輪]** Host 2 必須先造出一個「超級直白、無聊、字面化、甚至有點搞笑」的【直白爛句子】。（例如：橡皮擦就是用來擦錯字的，擦完它就變黑變小了。）
+   - 🗣️ **[第二輪]** Host 1 溫柔地接住，並引導 Host 2 運用本段的「靈感碎片」加上想像力。
+   - 🗣️ **[第二輪]** Host 2 嘗試加入一點想像力，但還是不夠完美。
+   - 🗣️ **[第三輪]** Host 1 進行最後的潤飾，並唸出最終優美的【完整範文】。
 
-## 🎙️ 敘事接力棒 (Continuity Guide)
-${batonSentence ? `⚠️ 上一段的結尾口白是：「${batonSentence}」\n請直接銜接這句話的語氣開始本段。主持人【嚴禁】再次自我介紹或打招呼！` : '這是第一段教學，請直接開始引導觀察。'}
-
-內容數據：
-${paraContent}
-
-請嚴格依照 TYPE_Q, TYPE_C, TYPE_D 順序輸出。`;
+請確保對話生動有趣，充滿互動感！請直接輸出包含 【版型】、【AUDIO 聽覺腳本】與【VISUAL 視覺畫面】的 Markdown 內容。`;
   },
 
   // 4. 分歧路徑 Chunk (Slide FK) - 🚀 合併 Q(提問) 與 E(分歧選擇)
