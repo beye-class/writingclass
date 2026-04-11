@@ -79,6 +79,7 @@ export interface ForkPath {
   toolsSlide: SlideTools;   
   actionSlide: SlideAction; 
   validationHint?: string;
+  validationLevel?: 'too_simple' | 'appropriate' | 'too_difficult';
 }
 
 export interface PoemModules { 
@@ -109,6 +110,7 @@ export interface DraftParagraph {
   forkPaths?: number; 
   feedback?: string; 
   validationHint?: string; 
+  validationLevel?: 'too_simple' | 'appropriate' | 'too_difficult';
   isForkConfirmed?: boolean; 
   
   // 🚀 新增：雙階工作流狀態 (Two-Stage Workflow)

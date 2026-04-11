@@ -212,11 +212,17 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
     set({ drafts: next }); 
   },
   
-  handleValidateSentence: async (idx, s, pIdx?: number) => {
+handleValidateSentence: async (idx, s, pIdx?: number) => {
     if (!s.trim()) return;
+    
+    const store = get();
+    // 🚀 1. 點擊瞬間給予回饋，讓使用者知道系統正在運作
+    store.showToast("🔍 AI 正在分析句子難度...", "info");
+
     try {
-      const res = await validateSentence(s, gradeConfig[get().grade as keyof typeof gradeConfig].label);
-      const next = [...get().drafts]; 
+      const res = await validateSentence(s, gradeConfig[store.grade as keyof typeof gradeConfig].label);
+      const next = [...store.drafts]; 
+      
       if (pIdx !== undefined) {
         const nextPaths = [...next[idx].paths];
         nextPaths[pIdx] = { ...nextPaths[pIdx], validationHint: res.isValid ? undefined : res.hint };
@@ -225,7 +231,18 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
         next[idx] = { ...next[idx], validationHint: res.isValid ? undefined : res.hint };
       }
       set({ drafts: next });
-    } catch (e) {}
+
+      // 🚀 2. 檢查完畢後給予明確的結果提示
+      if (res.isValid) {
+        store.showToast("✅ 難度適中！完美符合該年級程度。", "success");
+      } else {
+        store.showToast("⚠️ 發現難度落差，請參考下方出現的提示！", "error");
+      }
+
+    } catch (e) {
+      // 🚀 3. 攔截錯誤並通知使用者，不再默默卡死
+      store.showToast("❌ 難度分析失敗，請稍後再試", "error");
+    }
   },
 
   handleAdjustSentence: async (idx, dir, pIdx) => {
@@ -300,7 +317,11 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
         const sentence = next[i].actionSlide?.exampleSentence;
         if (sentence && sentence.trim() !== '') {
           const res = await validateSentence(sentence, gradeLabel);
-          next[i] = { ...next[i], validationHint: res.isValid ? "" : res.hint };
+          next[i] = { 
+            ...next[i], 
+            validationHint: res.isValid ? "" : res.hint,
+            validationLevel: (res.level as any) || (res.isValid ? "appropriate" : "too_difficult")
+          };
         }
         
         if (next[i].forkEnabled && next[i].paths && next[i].paths.length > 0) {
@@ -309,7 +330,11 @@ const createProjectSlice: StateCreator<SharedState, [], [], ProjectSlice> = (set
             const pathSentence = newPaths[j].actionSlide?.exampleSentence;
             if (pathSentence && pathSentence.trim() !== '') {
               const res = await validateSentence(pathSentence, gradeLabel);
-              newPaths[j] = { ...newPaths[j], validationHint: res.isValid ? "" : res.hint };
+              newPaths[j] = { 
+                ...newPaths[j], 
+                validationHint: res.isValid ? "" : res.hint,
+                validationLevel: (res.level as any) || (res.isValid ? "appropriate" : "too_difficult")
+              };
             }
           }
           next[i] = { ...next[i], paths: newPaths };

@@ -366,15 +366,20 @@ export async function adjustSentenceDifficulty(sentence: string, gradeLabel: str
 }
 
 // 🚀 請替換 src/services/gemini.ts 內的 validateSentence 函式
-export async function validateSentence(sentence: string, gradeLabel: string): Promise<{ isValid: boolean, hint: string }> {
+export async function validateSentence(sentence: string, gradeLabel: string): Promise<{ isValid: boolean, hint: string, level?: string }> {
   const prompt = PromptFactory.buildValidateSentencePrompt(sentence, gradeLabel);
 
   try {
     const text = await callProxy(prompt, "gemini-2.5-flash", undefined, "application/json");
-    const result = safeParseJSON(text, { isValid: true, hint: "" });
-    return Array.isArray(result) ? result[0] : result;
+    const result = safeParseJSON(text, { isValid: true, hint: "", level: "appropriate" });
+    const finalResult = Array.isArray(result) ? result[0] : result;
+    return {
+      isValid: finalResult.isValid ?? true,
+      hint: finalResult.hint ?? "",
+      level: finalResult.level ?? "appropriate"
+    };
   } catch (error: any) {
-    return { isValid: true, hint: "" };
+    return { isValid: true, hint: "", level: "appropriate" };
   }
 }
 

@@ -203,16 +203,24 @@ export default function DraftCard({
             <textarea 
               value={para.actionSlide?.exampleSentence || ''} 
               onChange={(e) => updateNestedField('actionSlide', 'exampleSentence', e.target.value)} 
-              className={`w-full text-[13px] font-bold text-[var(--blue-deep)] bg-[var(--blue-light)]/20 rounded-xl p-4 border transition-all resize-none h-16 ${para.validationHint ? 'border-red-300 ring-2 ring-red-50' : 'border-[var(--blue-light)] focus:border-[var(--blue-mid)]'}`} 
+              className={`w-full text-[13px] font-bold text-[var(--blue-deep)] bg-[var(--blue-light)]/20 rounded-xl p-4 border transition-all resize-none h-16 ${para.validationHint ? (para.validationLevel === 'too_simple' ? 'border-amber-300 ring-2 ring-amber-50' : 'border-red-300 ring-2 ring-red-50') : 'border-[var(--blue-light)] focus:border-[var(--blue-mid)]'}`} 
             />
             <AnimatePresence>
               {para.validationHint && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-red-50 border border-red-100 rounded-xl p-3 flex items-start gap-2.5">
-                  <AlertCircle size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }} 
+                  animate={{ opacity: 1, height: 'auto' }} 
+                  exit={{ opacity: 0, height: 0 }} 
+                  className={`${para.validationLevel === 'too_simple' ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100'} border rounded-xl p-3 flex items-start gap-2.5`}
+                >
+                  <AlertCircle size={14} className={`${para.validationLevel === 'too_simple' ? 'text-amber-500' : 'text-red-500'} shrink-0 mt-0.5`} />
                   <div className="flex-1 space-y-2">
-                    <p className="text-[10px] font-bold text-red-600 leading-relaxed">{para.validationHint}</p>
-                    <button onClick={() => handleAdjustSentence(idx, 'down')} className="text-[9px] bg-red-500 text-white px-2.5 py-1 rounded-full font-black hover:bg-red-600 transition-colors flex items-center gap-1">
-                      <Wand2 size={10} /> 立即修正為符合年級的難度
+                    <p className={`text-[10px] font-bold ${para.validationLevel === 'too_simple' ? 'text-amber-700' : 'text-red-600'} leading-relaxed`}>{para.validationHint}</p>
+                    <button 
+                      onClick={() => handleAdjustSentence(idx, para.validationLevel === 'too_simple' ? 'up' : 'down')} 
+                      className={`text-[9px] ${para.validationLevel === 'too_simple' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600'} text-white px-2.5 py-1 rounded-full font-black transition-colors flex items-center gap-1`}
+                    >
+                      <Wand2 size={10} /> {para.validationLevel === 'too_simple' ? '立即升階為符合年級的難度' : '立即降階為符合年級的難度'}
                     </button>
                   </div>
                 </motion.div>
@@ -436,16 +444,24 @@ export default function DraftCard({
                         <textarea 
                           value={path.actionSlide.exampleSentence} 
                           onChange={(e) => updateForkPathSentence(pIdx, e.target.value)}
-                          className={`w-full text-[10px] font-bold bg-[var(--blue-light)]/20 rounded-lg p-2 border transition-all resize-none h-12 outline-none ${path.validationHint ? 'border-red-300 ring-2 ring-red-50' : 'border-transparent'}`} 
+                          className={`w-full text-[10px] font-bold bg-[var(--blue-light)]/20 rounded-lg p-2 border transition-all resize-none h-12 outline-none ${path.validationHint ? (path.validationLevel === 'too_simple' ? 'border-amber-300 ring-2 ring-amber-50' : 'border-red-300 ring-2 ring-red-50') : 'border-transparent'}`} 
                         />
                         <AnimatePresence>
                           {path.validationHint && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-red-50 border border-red-100 rounded-lg p-2 flex items-start gap-2 mt-1">
-                              <AlertCircle size={12} className="text-red-500 shrink-0 mt-0.5" />
+                            <motion.div 
+                              initial={{ opacity: 0, height: 0 }} 
+                              animate={{ opacity: 1, height: 'auto' }} 
+                              exit={{ opacity: 0, height: 0 }} 
+                              className={`${path.validationLevel === 'too_simple' ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100'} border rounded-lg p-2 flex items-start gap-2 mt-1`}
+                            >
+                              <AlertCircle size={12} className={`${path.validationLevel === 'too_simple' ? 'text-amber-500' : 'text-red-500'} shrink-0 mt-0.5`} />
                               <div className="flex-1 space-y-1.5">
-                                <p className="text-[9px] font-bold text-red-600 leading-relaxed">{path.validationHint}</p>
-                                <button onClick={() => handleAdjustSentence(idx, 'down', pIdx)} className="text-[8px] bg-red-500 text-white px-2 py-1 rounded-full font-black hover:bg-red-600 transition-colors flex items-center gap-1">
-                                  <Wand2 size={8} /> 立即修正為符合年級的難度
+                                <p className={`text-[9px] font-bold ${path.validationLevel === 'too_simple' ? 'text-amber-700' : 'text-red-600'} leading-relaxed`}>{path.validationHint}</p>
+                                <button 
+                                  onClick={() => handleAdjustSentence(idx, path.validationLevel === 'too_simple' ? 'up' : 'down', pIdx)} 
+                                  className={`text-[8px] ${path.validationLevel === 'too_simple' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600'} text-white px-2 py-1 rounded-full font-black transition-colors flex items-center gap-1`}
+                                >
+                                  <Wand2 size={8} /> {path.validationLevel === 'too_simple' ? '立即升階為符合年級的難度' : '立即降階為符合年級的難度'}
                                 </button>
                               </div>
                             </motion.div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { Network, Plus, Trash2, RefreshCw, ChevronRight, Wand2, Bug as Bee, Layout, MessageSquare, Send, Sparkles, GripVertical, Split, X, Edit2, Check } from 'lucide-react';
 import { OutlineItem, SocraticMessage } from '../data/types';
-import { THINKING_TOOLS_DETAILED } from '../data/strategies';
+import { THINKING_TOOLS_DETAILED, SOCRATIC_SUGGESTIONS } from '../data/strategies';
 
 interface Step2OutlineProps {
   grade: string;
@@ -189,6 +189,22 @@ export default function Step2Outline({
                 </p>
               </div>
             )}
+            
+            {/* 🚀 新增：蘇格拉底引導建議按鈕 */}
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {(SOCRATIC_SUGGESTIONS[genres[0]] || SOCRATIC_SUGGESTIONS['default']).map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setSocraticInput(s);
+                  }}
+                  className="px-2.5 py-1 bg-white border border-[var(--border)] rounded-full text-[9px] font-black text-[var(--brown-mid)] hover:border-[var(--amber)] hover:text-[var(--amber)] transition-all shadow-sm"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+
             <div className="relative">
               <input 
                 value={socraticInput}

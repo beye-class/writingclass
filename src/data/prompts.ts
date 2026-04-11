@@ -216,13 +216,13 @@ ${history.map((m: any) => `${m.role === 'user' ? '老師' : 'Bee老師'}: ${m.co
 
     return `你是「Bee老師」寫作教學策展人。請執行 Phase 2 (Blueprint) 任務。
 
-【🚨 絕對禁止】：請純粹輸出 JSON 格式的大綱，絕對不可輸出任何投影片版型標籤 (如 TYPE_Q) 或聽覺/視覺區塊。
+【🚨 絕對禁止】：請純粹輸出 JSON 格式的大綱，絕對不可輸出 any 投影片版型標籤 (如 TYPE_Q) 或聽覺/視覺區塊。
 
 ## 任務目標
 為題目「${topic}」構思一個結構化的大綱（認知鷹架）。${imageInstruction}${sensoryInstruction}${rhetoricInstruction}
 
 ## 限制條件
-1. **不帶皮膚**：嚴禁出現任何敘事皮膚的術語，僅專注於教學內容（骨）。
+1. **不帶皮膚**：嚴禁出現 any 敘事皮膚的術語，僅專注於教學內容（骨）。
 2. **認知校準**：必須嚴格遵守該年級的修辭與句型標準。
 ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴格保留原詩的「節奏與排比感」，並以「意象模塊」來建構骨架。嚴禁拆解成 [動詞]、[名詞] 這種死板的語法標示。\n${PROMPT_TEMPLATES.poemRules}` : `3. **例句原型**：為每個段落提供一個標準的文學示範句。`}
 
@@ -234,11 +234,10 @@ ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴�
   buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
     const base = PromptFactory.buildBasePrompt(skin.name, skin.tone, skin.metaphor.vocab, skin.metaphor.sentence, "預設風格", "無");
     
-    // 🚀 新增：動態判斷是否為詩歌，給予完全不同的範文長度與排版指令
     const isPoem = genre.includes('詩');
     const fullExampleRule = isPoem 
-      ? `2. **fullExample (完整範文)**：必須是一小節「純粹的童詩」。【🚨 絕對禁止寫成散文或長篇大論！】字數要精煉，必須強制使用分行（維持詩的排版與節奏感），保留原詩的輕盈感。`
-      : `2. **fullExample (完整範文)**：這必須是一段「完整的文章段落」。它必須【包含並延伸】上述的 exampleSentence，請為它加上前後文、情境鋪陳或情感收尾。完整範文的長度必須大於示範例句！`;
+      ? `2. **fullExample (完整範文)**：必須是一小節「純粹的童詩」。字數要精煉，必須強制使用分行。🚨 必須是一首自然、完整的詩，【絕對禁止】出現任何【】括號或填空提示！`
+      : `2. **fullExample (完整範文)**：必須是一段「完整的文章段落」。長度必須大於示範例句。🚨 必須是流暢的文章，【絕對禁止】出現任何【】括號或填空提示！`;
 
     return `${base}
 你是「Bee老師」寫作教學助手。
@@ -259,11 +258,11 @@ ${skin.id === 'little_poet' ? `\n👉 【小詩人專屬指令】：請將所有
 2. **Level 2 深入聯想**：針對動作、質感或心理感受進行追問。
 3. **Level 3 核心收斂**：自然地引導學生思考本段的重點。
 
-## 📝 產出欄位嚴格定義 (Critical Field Relations)
-在生成 actionSlide (實戰演練) 時，請嚴格遵守以下層次關係，【絕對禁止】偷懶複製貼上：
-1. **exampleSentence (示範例句)**：這是一句「單一且精煉」的句子，純粹用來示範本段的核心技法。
+## 📝 產出欄位嚴格隔離 (Critical Field Isolation)
+在生成 actionSlide (實戰演練) 時，請嚴格遵守以下層次關係，並【絕對隔離】括號的使用：
+1. **exampleSentence (示範例句)**：這是一句用來示範技法的優美句子。🚨 【絕對禁止】出現【】括號。
 ${fullExampleRule}
-3. **scaffolding (寫作急救站)**：必須提供對應 fullExample 的「意象模塊引導骨架」，用【】標示可替換的具體元素。
+3. **scaffolding (寫作急救站)**：必須提供對應 fullExample 的「意象模塊引導骨架」。🚨 【只有這個欄位】可以使用【】標示可替換的具體元素！
 
 題目：${topic} (${genre})，年級：${gradeLabel}
 ${outlineContext}${sensoryContext}
@@ -293,15 +292,28 @@ ${PROMPT_TEMPLATES.gradeSpecs}
     const base = PromptFactory.buildBasePrompt("Bee老師", "嚴格、專業", "認知校準", "修辭檢查", "預設風格", "無");
     return `${base}
 你是「Bee老師」寫作教學專家，現在擔任【${gradeLabel}】的「認知校準督導」。
-請嚴格檢查以下「寫作示範例句」是否踩到該年級的【修辭禁令】或【認知超標】。
+請嚴格檢查以下「寫作示範例句」是否符合該年級的認知水平。
 
-## 校準進程表
+## 🎯 檢查標準
+1. **太難 (Too Difficult)**：是否踩到該年級的【修辭禁令】？是否使用了過於艱澀的詞彙或過長、過於複雜的句型？
+2. **太簡單 (Too Simple)**：對於該年級來說，是否過於直白、缺乏修辭美感，或長度過短（例如：高年級卻只寫出低年級程度的短句）？
+3. **認知超標**：是否涉及該年級學生難以理解的抽象概念或社會經驗？
+
+## 📊 各年級校準參考
 ${PROMPT_TEMPLATES.gradeSpecs}
 
-## 待檢查例句
+## 📝 待檢查例句
 「${sentence}」
 
-請回傳 JSON 格式，包含 isValid 與 hint。`;
+## 📤 回傳格式 (JSON)
+\`\`\`json
+{
+  "isValid": boolean, // 若完全符合該年級程度則為 true，太難或太簡單皆為 false
+  "level": "too_simple" | "appropriate" | "too_difficult",
+  "hint": "請提供具體的建議與原因。例如：『這句話使用了暗喻，對三年級來說太抽象了，建議改用明喻（像...）。』或『這句話對五年級來說太簡單了，建議加入一些感官摹寫。』"
+}
+\`\`\`
+請直接回傳 JSON 物件。`;
   },
 
   // 12. 重新設計分歧路徑 (強化版：支援不同主題舉例)
@@ -408,7 +420,7 @@ ${draftContext}
     const rhetoricText = rhetoricSkills.length > 0 ? `\n- 指定修辭技巧：${rhetoricSkills.join('、')}` : '';
     return `你是「Bee老師」寫作教學專家。
 
-【🚨 絕對禁止】：請純粹輸出 JSON 格式的大綱，絕對不可輸出任何投影片版型標籤 (如 TYPE_Q) 或對話劇本。
+【🚨 絕對禁止】：請純粹輸出 JSON 格式的大綱，絕對不可輸出 any 投影片版型標籤 (如 TYPE_Q) 或對話劇本。
 
 你的任務是將與老師的深度對話內容，轉化為一份具備心理學層次與認知鷹架的「${gradeLabel}」學生寫作大綱。
 
@@ -416,7 +428,7 @@ ${draftContext}
 1. **認知校準**：確保大綱中的「例句原型」與「教學重點」嚴格符合 ${gradeLabel} 學生的認知發展階段。
 2. **敘事流動**：段落之間應具備邏輯連貫性與情感遞進。
 3. **對話轉化與分支決策**：精確捕捉老師在對話中提到的核心意象、教學要求，以及特別指定的分歧路徑 (Fork)。
-${genre.includes('詩歌仿寫') ? `4. **結構仿寫 (Critical)**：必須保留原詩的「情感節奏」，並使用「意象模塊法」建構鷹架。嚴禁拆解成 [名詞]、[動詞] 這種死板的語法填空。\n${PROMPT_TEMPLATES.poemRules}` : ''}
+${genre.includes('詩歌仿寫') ? `4. **結構仿寫 (Critical)**：必須保留原詩的「情感節奏」，並使用「意象模塊法」建構鷹架。嚴禁拆解成 [動詞]、[名詞] 這種死板的語法填空。\n${PROMPT_TEMPLATES.poemRules}` : ''}
 
 ## 專案背景：
 - 題目：${topic}，類型：${genre}，年級：${gradeLabel}，思考工具：${thinkingTool}${rhetoricText}，筆記：${notes} ${originalPoem ? `，原詩：${originalPoem}` : ''}
