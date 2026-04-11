@@ -208,7 +208,12 @@ ${history.map((m: any) => `${m.role === 'user' ? '老師' : 'Bee老師'}: ${m.co
   },
 
   // 8. 大綱生成 (脫離投影片排版綁架)
-  buildOutlinePrompt: (topic: string, genre: string, gradeLabel: string, skills: string[], notes: string, imageInstruction: string, sensoryInstruction: string, rhetoricInstruction: string = '') => {
+  buildOutlinePrompt: (topic: string, genre: string, gradeLabel: string, skills: string[], notes: string, imageInstruction: string, sensoryInstruction: string, rhetoricSkills: string[] = []) => {
+    
+    const rhetoricInstruction = (skills.includes('修辭運用') && rhetoricSkills.length > 0)
+      ? `\n## ✍️ 修辭運用指令 (Critical)\n使用者指定了以下具體的修辭技巧，請務必在大綱的「desc (教學重點)」中明確標註要教導這些修辭，並在「prototype (例句原型)」中展現：\n- 指定修辭：${rhetoricSkills.join('、')}`
+      : '';
+
     return `你是「Bee老師」寫作教學策展人。請執行 Phase 2 (Blueprint) 任務。
 
 【🚨 絕對禁止】：請純粹輸出 JSON 格式的大綱，絕對不可輸出任何投影片版型標籤 (如 TYPE_Q) 或聽覺/視覺區塊。

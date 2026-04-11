@@ -247,13 +247,7 @@ export async function generateOutline(
 - 嗅覺/味覺/觸覺：${fiveSenses.olfactoryGustatoryTactile || '（未提供）'}`
     : '';
 
-  const rhetoricInstruction = rhetoricSkills && rhetoricSkills.length > 0
-    ? `\n## ✍️ 修辭運用指令 (Critical)
-使用者指定了以下具體的修辭技巧，請務必在大綱的「desc (教學重點)」中明確標註要教導這些修辭，並在「prototype (例句原型)」中展現：
-- 指定修辭：${rhetoricSkills.join('、')}`
-    : '';
-
-  const prompt = PromptFactory.buildOutlinePrompt(topic, genre, gradeLabel, skills, notes, imageInstruction, sensoryInstruction, rhetoricInstruction);
+  const prompt = PromptFactory.buildOutlinePrompt(topic, genre, gradeLabel, skills, notes, imageInstruction, sensoryInstruction, rhetoricSkills);
 
   try {
     const text = await callProxy(prompt, "gemini-2.5-flash", imageBase64, "application/json", OUTLINE_SCHEMA);
