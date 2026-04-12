@@ -143,39 +143,45 @@ ${masterBlueprint}
 請確保對話生動有趣，充滿互動感！請直接輸出包含 【版型】、【AUDIO 聽覺腳本】與【VISUAL 視覺畫面】的 Markdown 內容。`;
   },
 
-  buildForkChunk: (basePrompt: string, index: number, paths: any[]) => {
-    const pathsInfo = paths.map((p, i) => `【Path ${String.fromCharCode(65+i)}】\n寫作重點: ${p.focus || ''}\n裝備: ${p.toolsSlide?.vocabList?.join('/') || ''}\n例句: ${p.actionSlide?.exampleSentence || ''}\n範文: ${p.actionSlide?.fullExample || ''}`).join('\n\n');
-    
+  // 🚀 切割 1：只負責生成 TYPE_E (分歧總覽)
+  buildForkOverviewChunk: (basePrompt: string, index: number, paths: any[]) => {
+    const pathsInfo = paths.map((p, i) => `【Path ${String.fromCharCode(65+i)}】：${p.focus || ''}`).join('\n');
     return `${basePrompt}
 
-【當前任務：分歧路徑完整教學循環 (Fork Paths Full Cycle)】
+【當前任務：分歧路徑總覽 (Fork Overview)】
 我們來到了第 ${index} 個分歧任務點。
-請嚴格依照以下順序，產出此分歧點的「所有」投影片腳本：
+請「僅」產出 1 頁投影片腳本：
+【版型】TYPE_E Fork Page | Slide FK-${index}
+- 🎧 AUDIO：Host 1 說明為何產生分歧情境，Host 2 猶豫或提問。
+- 🖥️ VISUAL：展示 Path A / Path B 的強烈對比視覺。
 
-🚨 **強制產出順序與版型 (1 + 3N 結構)**：
-1. **第一步 (分歧總覽)**：首先，僅產出 1 頁 【版型】TYPE_E Fork Page | Slide FK-${index}。
-   - 🎧 AUDIO：Host 1 說明為何產生分歧情境，Host 2 猶豫或提問。
-   - 🖥️ VISUAL：展示 Path A / Path B 的強烈對比視覺。
-
-2. **第二步 (路徑 A 深入演練)**：接著，針對 Path A，連續產出 3 頁完整的教學循環：
-   - 【版型】TYPE_Q Question Page | Slide Q-PathA (觀察與提問)
-   - 【版型】TYPE_C Tools Page | Slide T-PathA (裝備與修辭引導)
-   - 【版型】TYPE_D Action Page | Slide A-PathA (爛句子對比與最終範文演練)
-
-3. **第三步 (路徑 B 深入演練)**：接著，針對 Path B，同樣連續產出 3 頁：
-   - 【版型】TYPE_Q Question Page | Slide Q-PathB
-   - 【版型】TYPE_C Tools Page | Slide T-PathB
-   - 【版型】TYPE_D Action Page | Slide A-PathB
-   (若有 Path C 則以此類推...)
-
----
-以下是各分歧路徑的內容資料：
+以下是分歧方向供參考：
 ${pathsInfo}
+`;
+  },
+
+  // 🚀 切割 2：只負責生成「單一條」路徑的 3 頁循環 (TYPE_Q -> C -> D)
+  buildForkPathChunk: (basePrompt: string, forkIndex: number, pathName: string, pathData: any, isPoem: boolean) => {
+    return `${basePrompt}
+
+【當前任務：單一分歧路徑深入演練】
+這是第 ${forkIndex} 個分歧點的【${pathName}】路徑。
+請嚴格依照順序，連續產出此「單一路徑」的 3 頁完整教學循環：
+1. 【版型】TYPE_Q Question Page | Slide Q-${pathName}
+2. 【版型】TYPE_C Tools Page | Slide T-${pathName}
+3. 【版型】TYPE_D Action Page | Slide A-${pathName}
+
+【路徑專屬資料】：
+- 寫作重點: ${pathData.focus || ''}
+- 裝備: ${pathData.toolsSlide?.vocabList?.join('/') || ''}
+- 示範例句: ${pathData.actionSlide?.exampleSentence || ''}
+- 完整範文: ${pathData.actionSlide?.fullExample || ''}
 
 【🚨 絕對強制注意事項】：
 - TYPE_C 必須包含「[🎨 修辭魔法引導]」與對應文體的「動態三步驟骨架」。
 - TYPE_D 必須包含「[🏷️ 技法徽章]」與對應文體的「動態三步驟急救站」。
-- 每一頁的 🎧 AUDIO 都必須維持 Host 1 與 Host 2 的生動對話 (包含 TYPE_D 必須有 Disaster 爛句子 vs. Masterpiece 完美範文的對比)。
+${isPoem ? `- TYPE_D 範文 (fullExample) 行數與節奏必須貼齊原詩，保持長短句交錯的自然語感，絕對禁止寫成散文！` : ''}
+- 每一頁的 🎧 AUDIO 都必須維持 Host 1 與 Host 2 的生動對話。
 `;
   },
 

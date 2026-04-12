@@ -534,12 +534,34 @@ You are acting as two writing coaches. You are teaching students how to write ab
       const forkDrafts = s.drafts.filter(d => d.forkEnabled && d.paths && d.paths.length > 0);
       if (forkDrafts.length > 0) {
         set((state) => ({ mdOutput: state.mdOutput + '---\n\n## Part 3：戰術分歧路徑\n\n' }));
+        
+        const isPoem = s.genres.join('、').includes('詩');
+
         for (const p of forkDrafts) {
           if (globalAbortController?.signal.aborted) throw new Error('AbortError');
           const forkIndex = s.drafts.indexOf(p) + 1;
-          const forkPrompt = PromptFactory.buildForkChunk(basePrompt, forkIndex, p.paths!);
-          await generateFullScriptStream(forkPrompt, undefined, (chunk) => set((state) => ({ mdOutput: state.mdOutput + chunk })), style.name, globalAbortController.signal);
+          
+          // 🚀 階段 3-1: 呼叫 API 生成 TYPE_E 總覽頁
+          const overviewPrompt = PromptFactory.buildForkOverviewChunk(basePrompt, forkIndex, p.paths!);
+          await generateFullScriptStream(overviewPrompt, undefined, (chunk) => set((state) => ({ mdOutput: state.mdOutput + chunk })), style.name, globalAbortController.signal);
           set((state) => ({ mdOutput: state.mdOutput + '\n\n' }));
+
+          // 🛡️ 防禦性冷卻：暫停 2.5 秒，避免撞到 API 速率限制 (Rate Limit)
+          await new Promise(resolve => setTimeout(resolve, 2500));
+
+          // 🚀 階段 3-2: 將 3N 循環「切碎」逐條路徑呼叫 API 生成
+          for (let j = 0; j < p.paths!.length; j++) {
+            if (globalAbortController?.signal.aborted) throw new Error('AbortError');
+            
+            const pathName = `Path ${String.fromCharCode(65 + j)}`;
+            const pathPrompt = PromptFactory.buildForkPathChunk(basePrompt, forkIndex, pathName, p.paths![j], isPoem);
+            
+            await generateFullScriptStream(pathPrompt, undefined, (chunk) => set((state) => ({ mdOutput: state.mdOutput + chunk })), style.name, globalAbortController.signal);
+            set((state) => ({ mdOutput: state.mdOutput + '\n\n' }));
+
+            // 🛡️ 防禦性冷卻：每生成完一條路徑，暫停 3 秒，清空 Token 累積
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          }
         }
       }
 
