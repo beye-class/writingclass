@@ -138,13 +138,12 @@ export const layoutSkills: LayoutSkill[] = [
 
 ---
 
-// --- TYPE_C 裝備篇：加入修辭引導與中文動態標籤 ---
+// --- TYPE_C 裝備篇：加入修辭引導與動態多行標籤 ---
 【版型】TYPE_C Tools Page | Slide T[N] | 段落：[段落名稱] — ${config.skinMetaphor.vocab}裝備篇
 ## Slide T[N]：[段落名稱] — ${config.skinMetaphor.vocab}篇（Tools）
 
 ### 🎧 【AUDIO 聽覺腳本】
-**Host 1**：「[介紹裝備與詞彙]」
-**Host 2**：「[補充句型結構，引導學生如何將詞彙放入骨架中]」
+[請產出 Host 1 與 Host 2 的多輪對話。Host 1 介紹本段的靈感碎片，Host 2 扮演天真學徒提問，自然引導出如何將詞彙填入下方的骨架中。]
 
 ### 🖥️ 【VISUAL 視覺畫面】
 - **[🏷️] 視覺容器與材質**：[桌面俯視圖，文字容器採半透明磨砂玻璃質感，像卡片般排列]
@@ -153,22 +152,19 @@ export const layoutSkills: LayoutSkill[] = [
 - **[${config.skinMetaphor.vocab}補給站]**：👁️ 視覺 / 💛 感受 / 🤸 動作 / ✨ 特殊
 - **[${config.skinMetaphor.sentence}骨架]**：
   請依據本次文體（${config.genres}）自動翻譯標籤：
-  - 【第一步：觀察/基礎】
-  - 【第二步：想像/細節】
-  - 【第三步：心願/感受】
+  (🚨 若為詩歌：請依照範文的實際行數，產出對應數量的步驟。如 4 行詩即為 4 步：1.【設定場景】 2.【主角登場】 3.【加上想像】 4.【寫下心願】)
+  (🚨 若為一般文體：維持三步：【第一步：觀察/基礎】、【第二步：想像/細節】、【第三步：心願/感受】)
 - **💡 視覺金句**：[25 字以內金句]
 - **🎨 Gemini Prompt**：Art Style: Knolling | Subject: [裝備平鋪圖，展現本段提到的關鍵詞彙物件]
 
 ---
 
-// --- TYPE_D 演練篇：加入技法徽章與動態文體急救站 ---
+// --- TYPE_D 演練篇：確保對比環節與逐行鷹架 ---
 【版型】TYPE_D Action Page | Slide A[N] | 段落：[段落名稱] — ${config.skinMetaphor.essay}演練篇
 ## Slide A[N]：[段落名稱] — ${config.skinMetaphor.essay}篇（Action）
 
 ### 🎧 【AUDIO 聽覺腳本】
-**Host 1**：「[引導語]」
-**Host 2**：「[說出直白爛句子，展示未修飾前的原始狀態]」
-**Host 1**：「[給予具體修辭引導，唸出優美的完整範文]」
+[請依照系統給定的對話規則，產出 Host 1 與 Host 2 的多輪生動對話！⚠️ 絕對必須包含 Host 2 的「直白爛句子(Disaster)」與 Host 1 引導後的「完美範文(Masterpiece)」對比環節！]
 
 ### 🖥️ 【VISUAL 視覺畫面】
 - **[🏷️] 視覺容器與材質**：[採 6:4 分屏或全螢幕底圖，文字容器需確保 60% 背景露出]
@@ -177,10 +173,11 @@ export const layoutSkills: LayoutSkill[] = [
 - **[${config.skinMetaphor.sentence}急救站]**：
   請依本次文體（${config.genres}）自動生成對應標籤與填空：
   (🚨 標籤判斷邏輯：
-   若為詩歌：1.【第一步：具體觀察】 2.【第二步：加上想像】 3.【第三步：寫下心願】
+   若為詩歌：【必須與範文行數 100% 相同】請逐行建立標籤！如 4 行詩就要有 4 個步驟，嚴禁將多行內容合併為一步！
    若為記敘文：1.【第一步：基礎描寫】 2.【第二步：加入細節】 3.【第三步：寫出感受】
    若為說明/議論文：1.【第一步：客觀事實】 2.【第二步：舉例說明】 3.【第三步：總結想法】)
 - **🎨 Gemini Prompt**：Art Style: ${config.styleName} | Subject: [實戰場景圖，具象化本段範文的畫面感] | --style raw
+
 ---
 
 【版型】TYPE_E Fork Page | Slide FK | ${config.skinMetaphor.essay}分歧路徑選擇
