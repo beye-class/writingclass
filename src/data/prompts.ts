@@ -41,8 +41,12 @@ export const PROMPT_TEMPLATES = {
 
   forkRules: `
 ## 🔱 分歧路徑設計原則 (Forking Logic)
-1. 每個分歧路徑必須有獨特的教學維度（如：視覺 vs 聽覺，或 基礎 vs 進階）。
-2. 分歧內容必須保持核心主題一致，僅在描寫角度或難度上有所區別。`,
+1. **維度絕對掛鉤 (Dimension-Driven)**：每個分歧路徑的 \`exampleSentence\` 與 \`fullExample\` 必須與該路徑的 \`dimensions\` (維度) 緊密關聯。
+   - 若維度是「視覺」，則內容必須充滿色彩、光影與形狀的描寫。
+   - 若維度是「聽覺」，則內容必須專注於聲音、節奏與擬聲詞。
+   - 若維度是「基礎 vs 進階」，則進階版必須在修辭與意象深度上有顯著提升。
+2. **實質內容切換 (Content Variation)**：每條路徑必須描寫【完全不同】的具體對象或視角。嚴禁只是微調字詞，必須具備顯著的「畫面感差異」。
+3. **場景化示範**：示範例句必須具備該主題的「具象感」，讓學生一眼就能看出不同路徑的寫作特色。`,
 
   poemRules: `
 ## 🚨 詩歌骨架拆解最高準則：意象模塊法 (CRITICAL)
@@ -80,7 +84,7 @@ export const PromptFactory = {
 3. **文字懸浮化**：所有排版中，文字容器必須是半透明的，完整透出下方的教學情境底圖。
 4. **🚨 視覺構圖絕對隔離 (Visual DNA Isolation)**：圖片中【絕對禁止】出現主持人或任何與「皮膚設定」相關的道具！畫面純粹用來幫助學生理解文章情境的認知鷹架。
 5. **版型宣告強制性**：每一頁 Slide 開頭必須輸出一行：【版型】[TYPE代碼] [頁面全名] | [Slide編號] | [段落說明]。(包含 TYPE_Q, TYPE_C, TYPE_D，請嚴格比對下方的 Master Blueprint)
-6. **皮骨分離**：嚴格劃分 ### 🎧 【AUDIO 聽覺腳本】 與 ### 🖥️ 【VISUAL 視覺畫面】 兩大區塊。聽覺腳本僅放主持人對話，視覺畫面僅放排版元素。僅放主持人對話，視覺畫面僅放排版元素。
+6. **皮骨分離**：嚴格劃分 ### 🎧 【AUDIO 聽覺腳本】 與 ### 🖥️ 【VISUAL 視覺畫面】 兩大區塊。聽覺腳本僅放主持人對話，視覺畫面僅放排版元素。
 
 ## 🗣️ 主持人演繹
 語氣: ${tone}。詞彙=${vocabMetaphor}，句型=${sentenceMetaphor}。
@@ -136,23 +140,39 @@ ${masterBlueprint}
   },
 
   buildForkChunk: (basePrompt: string, index: number, paths: any[]) => {
-    const forkContent = paths.map((path, pi) => `路徑 ${String.fromCharCode(65+pi)}: 詞彙: ${path.toolsSlide?.vocabList?.join('/')} / 例句: ${path.actionSlide?.exampleSentence}`).join('\n');
+    const pathsInfo = paths.map((p, i) => `【Path ${String.fromCharCode(65+i)}】\n寫作重點: ${p.focus || ''}\n裝備: ${p.toolsSlide?.vocabList?.join('/') || ''}\n例句: ${p.actionSlide?.exampleSentence || ''}\n範文: ${p.actionSlide?.fullExample || ''}`).join('\n\n');
+    
     return `${basePrompt}
 
-【當前任務：將「提問引導」與「分歧選擇」合併！請嚴格依照 Master Blueprint 中的 TYPE_E 版型，僅生成 1 頁 Slide FK-${index}】
+【當前任務：分歧路徑完整教學循環 (Fork Paths Full Cycle)】
+我們來到了第 ${index} 個分歧任務點。
+請嚴格依照以下順序，產出此分歧點的「所有」投影片腳本：
 
-## 📝 TYPE_E (合併版) 特別執行指令：
-1. 🎧 **聽覺腳本 (AUDIO)**：Host 1 與 Host 2 必須先拋出引導觀察的提問（例如：請大家想像一下畫面...），接著順勢引出這兩種不同的分歧寫作視角供學生選擇。
-2. 🖥️ **視覺畫面 (VISUAL)**：請在畫面上方的「金句區 (Slogan)」或引言中放上核心提問，下方再並列 Path A 與 Path B 的選項資訊。
+🚨 **強制產出順序與版型 (1 + 3N 結構)**：
+1. **第一步 (分歧總覽)**：首先，僅產出 1 頁 【版型】TYPE_E Fork Page | Slide FK-${index}。
+   - 🎧 AUDIO：Host 1 說明為何產生分歧情境，Host 2 猶豫或提問。
+   - 🖥️ VISUAL：展示 Path A / Path B 的強烈對比視覺。
 
-## 🎨 圖片提示詞 (Gemini Prompt) 構圖鐵律：【對比聯想 ＆ 絕對隔離】
-1. 【對比聯想】：本頁的圖片提示詞必須根據下方「路徑例句」來設計【具體的對比情境圖】（例如左半邊是 A 情境，右半邊是 B 情境）。
-2. 【⚠️ 嚴禁皮膚干擾】：圖片必須幫助學生想像文章內容，嚴禁畫出主持人、麥克風或任何與「皮膚設定」相關的道具！
+2. **第二步 (路徑 A 深入演練)**：接著，針對 Path A，連續產出 3 頁完整的教學循環：
+   - 【版型】TYPE_Q Question Page | Slide Q-PathA (觀察與提問)
+   - 【版型】TYPE_C Tools Page | Slide T-PathA (裝備與修辭引導)
+   - 【版型】TYPE_D Action Page | Slide A-PathA (爛句子對比與最終範文演練)
 
-⚠️ 重要上下文警告：這是連續課程的中間段落，請直接進入教學提問。主持人【絕對不可】再次自我介紹或講歡迎詞！
+3. **第三步 (路徑 B 深入演練)**：接著，針對 Path B，同樣連續產出 3 頁：
+   - 【版型】TYPE_Q Question Page | Slide Q-PathB
+   - 【版型】TYPE_C Tools Page | Slide T-PathB
+   - 【版型】TYPE_D Action Page | Slide A-PathB
+   (若有 Path C 則以此類推...)
 
-分歧數據：
-${forkContent}`;
+---
+以下是各分歧路徑的內容資料：
+${pathsInfo}
+
+【🚨 絕對強制注意事項】：
+- TYPE_C 必須包含「[🎨 修辭魔法引導]」與對應文體的「動態三步驟骨架」。
+- TYPE_D 必須包含「[🏷️ 技法徽章]」與對應文體的「動態三步驟急救站」。
+- 每一頁的 🎧 AUDIO 都必須維持 Host 1 與 Host 2 的生動對話 (包含 TYPE_D 必須有 Disaster 爛句子 vs. Masterpiece 完美範文的對比)。
+`;
   },
 
   buildOutroChunk: (basePrompt: string, batonSentence?: string) => 
@@ -220,7 +240,7 @@ ${genre.includes('詩歌仿寫') ? `3. **結構仿寫 (Critical)**：必須嚴�
 請回傳符合 OUTLINE_SCHEMA 的 JSON 陣列。`;
   },
 
-buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
+  buildDraftPrompt: (topic: string, genre: string, gradeLabel: string, skin: Skin, outlineContext: string, sensoryContext: string, gradeId: string, outlineLength: number) => {
     const base = PromptFactory.buildBasePrompt(skin.name, skin.tone, skin.metaphor.vocab, skin.metaphor.sentence, "預設風格", "無");
     
     // 🚀 核心邏輯：判斷是否為詩歌模式
@@ -268,7 +288,8 @@ ${isPoem ? `
 ${outlineContext}${sensoryContext}
 
 【🚨 絕對強制指令】：
-大綱共有 ${outlineLength} 個段落。請為大綱中的【每一個】段落生成對應的草稿內容，回傳包含 ${outlineLength} 個物件的 JSON 陣列。`
+1. 大綱共有 ${outlineLength} 個段落。請為大綱中的【每一個】段落生成對應的草稿內容，回傳包含 ${outlineLength} 個物件的 JSON 陣列。
+2. **分歧路徑 (paths)**：若段落包含分歧路徑，請確保每個路徑的 \`exampleSentence\` 與 \`fullExample\` 內容，是根據該路徑指定的 \`dimensions\` (維度) 量身打造的具體示範，必須具備強烈的「畫面感差異」。`;
   },
 
   buildAdjustDifficultyPrompt: (sentence: string, gradeLabel: string, targetDir: string) => {
@@ -363,7 +384,7 @@ ${PROMPT_TEMPLATES.gradeSpecs}
 ${genre.includes('詩歌仿寫') ? PROMPT_TEMPLATES.poemRules : ''}
 
 ## ❓ 提問鏈設計要求 (Questioning Chain)
-在生成每個段落時，必須在 \`questions\` 陣列中提供 3 個階梯式提問，引導學生「由淺入深」進入寫作狀態。
+在大綱生成時，必須在 \`questions\` 陣列中提供 3 個階梯式提問，引導學生「由淺入深」進入寫作狀態。
 
 【🚨 嚴禁閱讀測驗】：提問的目的是為了「引起動機」與「激發學生自身的靈感」！絕對不可以直接問「範文中寫了什麼？」或「句子裡用了什麼修辭？」。
 
@@ -386,8 +407,14 @@ ${pathsInfo}
 
 ## 任務：
 請針對這幾個已經確定的「大概念路徑」，分別產出對應的教學內容（骨架）。
-請確保符合 ${gradeLabel} 的程度與 ${genre} 的特性。
-請直接回傳符合 FORK_PATH_SCHEMA 結構的 JSON 陣列。`;
+${PROMPT_TEMPLATES.gradeRules}
+${PROMPT_TEMPLATES.gradeSpecs}
+${PROMPT_TEMPLATES.forkRules}
+
+【🚨 絕對強制指令】：
+1. **維度精準對應**：請確保每個路徑的 \`exampleSentence\` 與 \`fullExample\` 內容，是根據該路徑指定的 \`dimensions\` (維度) 量身打造的。
+2. **具體化示範**：範文必須具備強烈的「畫面感」與「差異性」，讓學生能清晰感受到不同維度的寫作魅力。
+3. 請直接回傳符合 FORK_PATH_SCHEMA 結構的 JSON 陣列。`;
   },
 
   buildSmoothTransitionsPrompt: (gradeLabel: string, skinName: string, draftContext: string) => {

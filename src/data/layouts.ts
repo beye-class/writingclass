@@ -108,17 +108,18 @@ export const layoutSkills: LayoutSkill[] = [
 
 ---
 
+// --- TYPE_B 結構地圖：改為動態標題與心智圖視覺 ---
 【版型】TYPE_B Map Page | Slide 02 | ${config.skinMetaphor.essay}結構地圖
 ## Slide 02：[${config.skinMetaphor.essay}結構地圖]
 
 ### 🎧 【AUDIO 聽覺腳本】
-**Host 1**：「[介紹文章結構]」
-**Host 2**：「[扮演學徒發問或驚嘆]」
+**Host 1**：「[介紹文章結構，並逐一唸出各段的重點標題]」
+**Host 2**：「[針對這些標題內容表達驚嘆或好奇，扮演學徒發問]」
 
 ### 🖥️ 【VISUAL 視覺畫面】
-- **[結構地圖]**：開頭段 → 主體段 → 結尾段
-- **🎨 Gemini Prompt**：Art Style: Blueprint | Subject: [結構圖示，如古老藏寶圖或魔法陣]
-
+- **[🏷️] 視覺容器與材質**：[採全螢幕情境底圖，中央疊加半透明、發光的懸浮心智圖節點]
+- **[結構地圖]**：展示本次大綱的所有具體段落標題（例如：[段落一標題] ➔ [段落二標題] ➔ [段落三標題]...） // 🚀 視覺強化：改為具體標題
+- **🎨 Gemini Prompt**：Art Style: Mind Map Concept | Subject: [以心智圖概念呈現的文章結構。中央是巨大的作文題目節點，向外發散延伸出代表各段落標題的子節點。線條流暢且具備發光感，整體風格需與 ${config.styleName} 完美融合，背景透出該皮膚的世界觀元素。] // 🚀 視覺強化：改為心智圖
 ---
 【版型】TYPE_Q Question Page | Slide Q[N] | 核心提問組
 ## Slide Q[N]：[段落名稱] — 觀察與引導
@@ -137,37 +138,49 @@ export const layoutSkills: LayoutSkill[] = [
 
 ---
 
+// --- TYPE_C 裝備篇：加入修辭引導與中文動態標籤 ---
 【版型】TYPE_C Tools Page | Slide T[N] | 段落：[段落名稱] — ${config.skinMetaphor.vocab}裝備篇
 ## Slide T[N]：[段落名稱] — ${config.skinMetaphor.vocab}篇（Tools）
 
 ### 🎧 【AUDIO 聽覺腳本】
 **Host 1**：「[介紹裝備與詞彙]」
-**Host 2**：「[補充句型結構]」
+**Host 2**：「[補充句型結構，引導學生如何將詞彙放入骨架中]」
 
 ### 🖥️ 【VISUAL 視覺畫面】
-- **[🏷️] 視覺容器與材質**：[桌面俯視圖，文字應像實體卡片般散落或排列]
-- **[focus 寫作重點]**：[寫作重點描述]
+- **[🏷️] 視覺容器與材質**：[桌面俯視圖，文字容器採半透明磨砂玻璃質感，像卡片般排列]
+- **[focus 寫作重點]**：[寫作重點描述，例如：運用擬人法賦予物品生命]
+- **[🎨 修辭魔法引導]**：[用一句話解釋修辭：例如「擬人法就是讓靜悄悄的文具開口說話、許下心願的魔法！」]
 - **[${config.skinMetaphor.vocab}補給站]**：👁️ 視覺 / 💛 感受 / 🤸 動作 / ✨ 特殊
-- **[${config.skinMetaphor.sentence}骨架]**：down / core / up 三層句型
+- **[${config.skinMetaphor.sentence}骨架]**：
+  請依據本次文體（${config.genres}）自動翻譯標籤：
+  - 【第一步：觀察/基礎】
+  - 【第二步：想像/細節】
+  - 【第三步：心願/感受】
 - **💡 視覺金句**：[25 字以內金句]
-- **🎨 Gemini Prompt**：Art Style: Knolling | Subject: [裝備平鋪圖]
+- **🎨 Gemini Prompt**：Art Style: Knolling | Subject: [裝備平鋪圖，展現本段提到的關鍵詞彙物件]
 
 ---
 
+// --- TYPE_D 演練篇：加入技法徽章與動態文體急救站 ---
 【版型】TYPE_D Action Page | Slide A[N] | 段落：[段落名稱] — ${config.skinMetaphor.essay}演練篇
 ## Slide A[N]：[段落名稱] — ${config.skinMetaphor.essay}篇（Action）
 
 ### 🎧 【AUDIO 聽覺腳本】
 **Host 1**：「[引導語]」
-**Host 2**：「[說出直白爛句子或嘗試改寫]」
-**Host 1**：「[給予具體寫作指令並唸出完美範文]」
+**Host 2**：「[說出直白爛句子，展示未修飾前的原始狀態]」
+**Host 1**：「[給予具體修辭引導，唸出優美的完整範文]」
 
 ### 🖥️ 【VISUAL 視覺畫面】
-- **[🏷️] 視覺容器與材質**：[側邊/中央的半透明閱讀視窗，完整透出後方的教學情境底圖]
+- **[🏷️] 視覺容器與材質**：[採 6:4 分屏或全螢幕底圖，文字容器需確保 60% 背景露出]
+- **[🏷️ 技法徽章]**：[若本段有特定修辭，請產出亮眼徽章，如：✨ 擬人法 / 🔍 感官摹寫]
 - **[${config.skinMetaphor.essay}示範]**：[範文段落，需標示 V/S/R 色彩]
-- **[${config.skinMetaphor.sentence}急救站]**：down / core / up 三層填空模板
-- **🎨 Gemini Prompt**：Art Style: ${config.styleName} | Subject: [實戰場景圖] | --style raw
-
+- **[${config.skinMetaphor.sentence}急救站]**：
+  請依本次文體（${config.genres}）自動生成對應標籤與填空：
+  (🚨 標籤判斷邏輯：
+   若為詩歌：1.【第一步：具體觀察】 2.【第二步：加上想像】 3.【第三步：寫下心願】
+   若為記敘文：1.【第一步：基礎描寫】 2.【第二步：加入細節】 3.【第三步：寫出感受】
+   若為說明/議論文：1.【第一步：客觀事實】 2.【第二步：舉例說明】 3.【第三步：總結想法】)
+- **🎨 Gemini Prompt**：Art Style: ${config.styleName} | Subject: [實戰場景圖，具象化本段範文的畫面感] | --style raw
 ---
 
 【版型】TYPE_E Fork Page | Slide FK | ${config.skinMetaphor.essay}分歧路徑選擇
