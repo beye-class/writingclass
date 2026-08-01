@@ -169,7 +169,7 @@ export const layoutSkills: LayoutSkill[] = [
 ### 🖥️ 【VISUAL 視覺畫面】
 - **[🏷️] 視覺容器與材質**：[採 6:4 分屏或全螢幕底圖，文字容器需確保 60% 背景露出]
 - **[🏷️ 技法徽章]**：[若本段有特定修辭，請產出亮眼徽章，如：✨ 擬人法 / 🔍 感官摹寫]
-- **[${config.skinMetaphor.essay}示範]**：[範文段落，需標示 V/S/R 色彩]
+- **[${config.skinMetaphor.essay}示範]**：[範文段落，需在每句句尾標示 V/S/R 色彩代碼]
 - **[${config.skinMetaphor.sentence}急救站]**：
   請依本次文體（${config.genres}）自動生成對應標籤與填空：
   (🚨 標籤判斷邏輯：

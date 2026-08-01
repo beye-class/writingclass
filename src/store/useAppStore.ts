@@ -585,8 +585,19 @@ You are acting as two writing coaches. You are teaching students how to write ab
     set({ isConverting: true, yamlOutput: '', activeTab: 'yaml' });
     const style = styleLib.find(st => st.id === s.styleId) || styleLib[0];
 
-    // 🛡️ 終極防禦 1：容錯率更高的 Markdown 切分正則
-    const validChunks = s.mdOutput.split(/\n(?=\s*(?:#|\*)*\s*(?:【版型】|\[Layout\]))/i).filter(c => c.trim().length > 0);
+    // 🚀 終極濾網：在送給 YAML 引擎前，把句尾的 V, S, R (包含括號或空白) 徹底刪除！
+    // 這樣就能保證 NotebookLM 絕對收不到這三個英文字母。
+    const cleanMdOutput = s.mdOutput.replace(/[\s(]*[VSR][\s)]*$/gim, '');
+
+    // 接下來使用洗乾淨的 cleanMdOutput 進行切片
+    const parts = cleanMdOutput.split(/(【版型】|版型|\[Layout\]|Layout)/i);
+    
+    const chunks: string[] = [parts[0]];
+    for (let i = 1; i < parts.length; i += 2) {
+      chunks.push(parts[i] + (parts[i + 1] || ''));
+    }
+
+    const validChunks = chunks.filter(c => c.trim().length > 0);
     const hasPreamble = validChunks.length > 0 && !/^\s*(?:#|\*)*\s*(?:【版型】|\[Layout\])/i.test(validChunks[0]);
     
     const preamble = hasPreamble ? validChunks[0] : "";

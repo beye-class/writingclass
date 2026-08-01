@@ -306,7 +306,7 @@ export default function Step2Outline({
                         <p className="text-xs text-[var(--brown-mid)] font-medium">請選擇您想在文章中運用的具體修辭，AI 將會在大綱中為您安排示範。</p>
                         
                         <div className="flex flex-wrap gap-2">
-                          {['明喻', '暗喻', '擬人', '擬物', '誇飾', '排比', '設問', '反問', '借代', '引用', '倒裝', '對偶', '頂真', '層遞'].map(r => (
+                          {['明喻', '暗喻', '擬人', '擬物', '誇飾', '排比', '設問', '反問', '借代', '引用', '倒裝', '對偶', '頂真', '層遞', '摹寫'].map(r => (
                             <button
                               key={r}
                               onClick={() => toggleRhetoricSkill(r)}
